@@ -80,6 +80,9 @@ button,a,select{font:inherit;color:inherit}
 const $ = s => document.querySelector(s);
 const st = { dev:'desktop', model:'375x667', theme:'light', page:'glowna.html' };
 try { const s = JSON.parse(localStorage.getItem('vat-demo') || '{}'); Object.assign(st, s); } catch(e){}
+const ALLOWED = ['glowna.html','rejestr.html','wkrotce.html'];
+function safePage(p){ const [path, q = ''] = String(p || '').split('?'); return ALLOWED.includes(path) ? path + (q && /^[a-z0-9=&]+$/i.test(q) ? '?' + q : '') : 'glowna.html'; }
+st.page = safePage(st.page); st.theme = st.theme === 'dark' ? 'dark' : 'light'; st.dev = st.dev === 'phone' ? 'phone' : 'desktop'; if (!['375x667','390x844'].includes(st.model)) st.model = '375x667';
 const save = () => { try { localStorage.setItem('vat-demo', JSON.stringify(st)); } catch(e){} };
 const PAGES = { 'glowna.html':'Główna', 'rejestr.html':'Rejestry i VAT', 'wkrotce.html':'Pozostałe obszary' };
 
@@ -104,7 +107,7 @@ function layout(){
   document.querySelectorAll('[data-theme]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === st.theme)));
   const base = st.page.split('?')[0];
   document.querySelectorAll('[data-go]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.go.split('?')[0] === base)));
-  $('#cur').innerHTML = `Ekran: <b>${PAGES[base] || base}</b>`;
+  $('#cur').textContent = 'Ekran: ' + (PAGES[base] || base);
   $('#openTab').href = st.page + (st.page.includes('?') ? '&' : '?') + 'theme=' + st.theme;
   document.body.style.background = st.theme === 'dark' ? '#0A0D13' : '';
 }
@@ -112,7 +115,7 @@ function go(href){
   const [p, q = ''] = href.split('?');
   const params = new URLSearchParams(q); params.set('theme', st.theme);
   $('#app').src = p + '?' + params.toString();
-  st.page = href; save(); layout();
+  st.page = safePage(href); save(); layout();
 }
 
 document.addEventListener('click', e => {
@@ -124,8 +127,8 @@ document.addEventListener('click', e => {
 });
 // The app reports which page is open and which theme it uses.
 window.addEventListener('message', e => {
-  if (!e.data || e.data.type !== 'vat-page') return;
-  st.page = e.data.page; st.theme = e.data.theme; save(); layout();
+  if (e.source !== $('#app').contentWindow || !e.data || e.data.type !== 'vat-page') return;
+  st.page = safePage(e.data.page); st.theme = e.data.theme === 'dark' ? 'dark' : 'light'; save(); layout();
   sendFrame();
 });
 function sendFrame(){ try { $('#app').contentWindow.postMessage({ type:'vat-frame', phone: st.dev === 'phone' }, '*'); } catch(e){} }

@@ -42,8 +42,8 @@
     try { window.parent.postMessage({ type: 'vat-page', page, theme: currentTheme(), title: document.title }, '*'); } catch (e) {}
   }
   window.addEventListener('message', e => {
-    if (!e.data) return;
-    if (e.data.type === 'vat-theme') applyTheme(e.data.theme, true);
+    if (!e.data || e.source !== window.parent) return;
+    if (e.data.type === 'vat-theme') applyTheme(e.data.theme === 'dark' ? 'dark' : 'light', true);
     // phone frame in the launcher: phones use overlay scrollbars, so hide the desktop one
     if (e.data.type === 'vat-frame') document.documentElement.classList.toggle('phone-frame', !!e.data.phone);
   });
