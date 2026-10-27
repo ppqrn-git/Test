@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obszary księgowe — Ścieżka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/base.css">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<script src="shared/shell.js"></script>
+<script src="shared/home.js"></script>
+<style>
+.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:20px;align-items:start}
+.side{position:sticky;top:16px;display:grid;gap:14px}
+.ready{padding:22px;display:grid;justify-items:center;text-align:center;gap:6px}
+.ring{position:relative;width:148px;height:148px}
+.ring svg{width:148px;height:148px;transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-content:center}
+.ring .v b{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.ring .v small{color:var(--muted);font-size:12.5px}
+.ready h2{margin:6px 0 0;font-size:17px}
+.ready p{margin:0;color:var(--muted);font-size:13.5px}
+.tally{display:grid;gap:6px;width:100%;margin-top:10px;text-align:left}
+.tally div{display:flex;justify-content:space-between;align-items:center;font-size:13.5px}
+.period{background:var(--navy-grad);color:#fff;border-radius:18px;padding:18px;box-shadow:0 16px 32px -20px rgba(21,39,77,.75)}
+.period .top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.period .ic{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.12);display:grid;place-items:center}
+.period h2{margin:0;font-size:17px}
+.period p{margin:0 0 12px;color:var(--navy-muted);font-size:13.5px}
+
+.start{display:flex;gap:16px;align-items:center;padding:20px 22px;flex-wrap:wrap;border-color:#C8D5EE}
+.start .ic{width:52px;height:52px;border-radius:15px;background:var(--navy-grad);color:#fff;display:grid;place-items:center;flex:none}
+.start .ic svg{width:24px;height:24px}
+.start .tx{flex:1;min-width:220px}
+.start small{color:var(--muted)}
+.start h2{margin:2px 0 2px;font-size:20px;letter-spacing:-.01em}
+.start p{margin:0;color:var(--muted)}
+
+.group{margin-top:6px}
+.gh{display:flex;align-items:center;gap:10px;margin:14px 0 8px}
+.gh h3{margin:0;font-size:15px;font-weight:600}
+.gh .ln{flex:1;height:1px;background:var(--line)}
+.gh a{font-size:13px;color:var(--navy2);text-decoration:none;font-weight:600;display:inline-flex;gap:4px;align-items:center}
+.gh a:hover{text-decoration:underline}
+.gh a svg{width:15px;height:15px}
+.step{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:4px 14px;align-items:start;padding:16px 18px;margin-bottom:8px}
+.step .num{grid-row:span 3;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;border:2px solid var(--line);color:var(--muted);background:var(--panel)}
+.step.confirm .num{border-color:#F0C98F;color:var(--warn);background:var(--warn-soft)}
+.step.config .num{border-color:#C7D3EE;color:var(--cfg);background:var(--cfg-soft)}
+.step .nm{font-weight:600;font-size:15.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.step .cta{grid-row:span 2;align-self:center}
+.step .next{color:var(--muted);font-size:13.5px}
+.step .next b{color:var(--ink);font-weight:600}
+.step details{grid-column:2/-1;margin-top:4px}
+.step summary{cursor:pointer;color:var(--muted);font-size:13px;list-style:none;display:inline-flex;align-items:center;gap:6px}
+.step summary::-webkit-details-marker{display:none}
+.step summary svg{width:15px;height:15px;transition:transform .2s}
+.step details[open] summary svg{transform:rotate(90deg)}
+.step details .conds{margin-top:8px}
+.bar{height:6px;border-radius:3px;background:var(--hover);overflow:hidden;width:90px;display:inline-block;vertical-align:middle;margin-left:6px}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:3px}
+.step.hl{border-color:#B9C9EA;box-shadow:0 16px 34px -24px rgba(21,39,77,.6)}
+
+@media (max-width:900px){ .layout{grid-template-columns:1fr} .side{position:static;grid-template-columns:1fr 1fr} .note{grid-column:1/-1} }
+@media (max-width:600px){ .side{grid-template-columns:1fr} .step{grid-template-columns:34px minmax(0,1fr)} .step .cta{grid-row:auto;grid-column:2;justify-self:start;margin-top:6px} .step .num{grid-row:span 4;width:30px;height:30px} }
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<main class="wrap page-enter">
+  <div class="pg-h"><nav class="crumbs"><span>Ewidencje</span></nav><h1>Obszary księgowe</h1><p>Mapa dostępnych obszarów księgowych dla aktywnej organizacji.</p></div>
+  <div class="layout">
+    <aside class="side">
+      <section class="card ready" id="ready"></section>
+      <section class="period" id="period"></section>
+      <div class="note" role="note"><i data-lucide="info"></i><span id="note"></span></div>
+    </aside>
+    <div>
+      <a class="card start" href="03-podglad.html" style="text-decoration:none;color:inherit">
+        <span class="ic"><i data-lucide="receipt-text"></i></span>
+        <span class="tx"><small>Jedyny obszar z danymi</small><h2>Zacznij od rejestrów VAT</h2><p id="startP"></p></span>
+        <span class="btn pri">Otwórz rejestry<i data-lucide="arrow-right"></i></span>
+      </a>
+      <div id="groups"></div>
+    </div>
+  </div>
+</main>
+<script>
+const V = VAT, H = HOME, $ = s => document.querySelector(s);
+Shell.mount({ home:true });
+
+const pct = Math.round(H.READY.met / H.READY.total * 100);
+const C = 2 * Math.PI * 62;
+const count = st => H.AVAIL.filter(a => a.status === st).length;
+$('#ready').innerHTML = `
+  <div class="ring"><svg viewBox="0 0 148 148" aria-hidden="true"><circle cx="74" cy="74" r="62" fill="none" stroke="#E6EAF1" stroke-width="12"/>
+    <circle cx="74" cy="74" r="62" fill="none" stroke="url(#g)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct/100)}"/>
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#15274D"/><stop offset="1" stop-color="#3D63B8"/></linearGradient></defs></svg>
+    <div class="v"><b>${pct}%</b><small>gotowości</small></div></div>
+  <h2>Dostępność obszarów</h2>
+  <p>${H.READY.met} z ${H.READY.total} warunków spełnionych. ${H.AVAIL_TEXT}</p>
+  <div class="tally">${['confirm','config','na'].map(st=>`<div>${H.chip(st)}<b>${count(st)}</b></div>`).join('')}</div>`;
+$('#period').innerHTML = `<div class="top"><span class="ic"><i data-lucide="calendar-days"></i></span><h2>${H.PERIOD.title}</h2></div><p>${H.PERIOD.text}</p>${H.chip(H.PERIOD.status)}`;
+$('#note').textContent = H.NOTE;
+$('#startP').textContent = `${V.cap(H.STATS.month)}: ${V.docs(H.STATS.salesCount)} sprzedaży, VAT należny ${V.fmt(H.STATS.salesVat)}.`;
+
+const order = { confirm:0, config:1, na:2 };
+let n = 0;
+$('#groups').innerHTML = H.AREAS.map(a => `
+  <section class="group">
+    <div class="gh"><h3 class="${a.live?'vat-title':''}">${a.name}</h3><span class="ln"></span><a href="${a.href}">Przejdź do obszaru<i data-lucide="arrow-right"></i></a></div>
+    ${H.availOf(a.id).sort((x,y)=>order[x.status]-order[y.status]).map(it => {
+      const met = it.c.filter(c=>c[0]==='y').length; n++;
+      return `<article class="card step ${it.status} ${it.id==='vat'?'hl':''}">
+        <span class="num">${n}</span>
+        <div class="nm">${it.name}${H.chip(it.status)}</div>
+        <a class="btn sm ${it.id==='vat'?'pri':''} cta" href="${it.href}">${it.cta}</a>
+        <div class="next">Następny krok: <b>${it.next}</b></div>
+        <details><summary><i data-lucide="chevron-right"></i>Warunki ${met}/${it.c.length}<span class="bar"><i style="width:${met/it.c.length*100}%"></i></span></summary>${H.conds(it)}</details>
+      </article>`; }).join('')}
+  </section>`).join('');
+
+V.bindMenus();
+V.icons();
+</script>
+</body>
+</html>

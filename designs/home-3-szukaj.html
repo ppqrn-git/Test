@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obszary księgowe — Wyszukiwarka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/base.css">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<script src="shared/shell.js"></script>
+<script src="shared/home.js"></script>
+<style>
+.col{max-width:780px;width:100%;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.hero{text-align:center;padding:28px 0 6px}
+.hero .crumbs{justify-content:center}
+.hero h1{margin:6px 0 6px;font-size:40px;letter-spacing:-.025em;line-height:1.1}
+.hero p{margin:0 auto;color:var(--muted);max-width:52ch}
+.sbox{position:relative}
+.sfield{display:flex;align-items:center;gap:12px;height:62px;padding:0 10px 0 20px;background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 40px -26px rgba(21,39,77,.55);color:var(--faint)}
+.sfield:focus-within{border-color:#9FB4DE;box-shadow:0 0 0 4px rgba(31,59,118,.12),0 18px 40px -26px rgba(21,39,77,.55)}
+.sfield svg{width:22px;height:22px}
+.sfield input{flex:1;min-width:0;border:0;outline:0;background:none;font-size:17px;color:var(--ink);height:100%}
+.sfield kbd{font:500 12px/1 "Onest",sans-serif;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:4px 7px;color:var(--muted);background:var(--hover)}
+.res{margin-top:8px;padding:8px}
+.res h3{margin:8px 10px 4px;font-size:12px;font-weight:500;color:var(--faint)}
+.res a,.res button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:10px;border-radius:12px;text-decoration:none;color:var(--ink);text-align:left}
+.res a:hover,.res a.act,.res button:hover{background:#F0F3F9}
+.res .ai{width:36px;height:36px;border-radius:10px;background:var(--hover);display:grid;place-items:center;color:var(--muted);flex:none}
+.res .ai.navy{background:var(--navy-grad);color:#fff}
+.res .t{flex:1;min-width:0}
+.res .t b{display:block;font-weight:600}
+.res .t small{color:var(--muted);font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res kbd{font:500 12px/1 "Onest",sans-serif;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:4px 7px;color:var(--muted)}
+.res .empty{padding:20px;text-align:center;color:var(--muted)}
+mark{background:#FFE9A8;color:inherit;border-radius:3px;padding:0 1px}
+
+.state{padding:6px 0}
+.state .row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line);cursor:pointer}
+.state .row:first-of-type{border-top:0}
+.state .row:hover{background:#FAFBFD}
+.state .row .nm{flex:1;font-weight:600;display:flex;align-items:center;gap:10px}
+.state .row .nm svg{color:var(--muted)}
+.state .row .chev{color:var(--faint);transition:transform .2s}
+.state .row[aria-expanded=true] .chev{transform:rotate(180deg)}
+.state .det{padding:0 16px 14px 44px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.state h2{margin:0;padding:16px 16px 2px;font-size:16px}
+.state>p{margin:0;padding:0 16px 10px;color:var(--muted);font-size:13px}
+.per{display:flex;gap:14px;align-items:center;padding:16px 18px;background:var(--navy-grad);color:#fff;border-radius:18px;flex-wrap:wrap;box-shadow:0 16px 32px -20px rgba(21,39,77,.75)}
+.per .ic{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.12);display:grid;place-items:center;flex:none}
+.per .tx{flex:1;min-width:200px}
+.per b{font-size:16px}
+.per p{margin:2px 0 0;color:var(--navy-muted);font-size:13px}
+.foot{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px;justify-content:center;text-align:center}
+.foot svg{width:16px;height:16px;color:var(--warn)}
+@media (max-width:600px){ .hero{padding-top:8px} .hero h1{font-size:30px} .sfield{height:54px;border-radius:16px} .sfield kbd,.res kbd{display:none} .state .det{padding-left:16px} }
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<main class="wrap page-enter">
+  <div class="col">
+    <div class="hero"><nav class="crumbs"><span>Ewidencje</span></nav><h1>Obszary księgowe</h1><p>Mapa dostępnych obszarów księgowych dla aktywnej organizacji. Wpisz, czego szukasz, albo wybierz obszar.</p></div>
+    <div class="sbox">
+      <label class="sfield"><i data-lucide="search"></i><input id="q" type="search" placeholder="Obszar, dokument lub kontrahent — np. „Demo Alfa 03”" autocomplete="off" aria-label="Szukaj"><kbd>/</kbd></label>
+      <div class="card res" id="res"></div>
+    </div>
+    <section class="per"><span class="ic"><i data-lucide="calendar-days"></i></span><div class="tx"><b id="perT"></b><p id="perP"></p></div><span id="perC"></span></section>
+    <section class="card state" aria-labelledby="stH"><h2 id="stH">Dostępność obszarów</h2><p id="stP"></p><div id="rows"></div></section>
+    <p class="foot"><i data-lucide="info"></i><span id="note"></span></p>
+  </div>
+</main>
+<script>
+const V = VAT, H = HOME, $ = s => document.querySelector(s);
+Shell.mount({ home:true });
+$('#perT').textContent = H.PERIOD.title; $('#perP').textContent = H.PERIOD.text; $('#perC').innerHTML = H.chip(H.PERIOD.status);
+$('#stP').textContent = H.AVAIL_TEXT; $('#note').textContent = H.NOTE;
+
+const DOCS = V.DATA.sales.concat(V.DATA.purchases);
+const hl = (t, q) => { if (!q) return V.esc(t); const i = t.toLowerCase().indexOf(q); return i < 0 ? V.esc(t) : V.esc(t.slice(0,i)) + '<mark>' + V.esc(t.slice(i, i+q.length)) + '</mark>' + V.esc(t.slice(i+q.length)); };
+
+function renderRes(){
+  const q = $('#q').value.trim().toLowerCase();
+  if (!q){
+    $('#res').innerHTML = `<h3>Obszary</h3>` + H.AREAS.map((a,i) => `
+      <a href="${a.href}"><span class="ai ${a.live?'navy':''}"><i data-lucide="${a.icon}"></i></span><span class="t"><b class="${a.live?'vat-title':''}">${a.name}</b><small>${a.live ? `${V.cap(H.STATS.month)}: ${V.docs(H.STATS.salesCount)}, VAT ${V.fmt(H.STATS.salesVat)}` : a.desc}</small></span>${a.live?H.chip('confirm'):H.chip('soon')}<kbd>${i+1}</kbd></a>`).join('');
+  } else {
+    const areas = H.AREAS.filter(a => (a.name+' '+a.desc).toLowerCase().includes(q));
+    const av = H.AVAIL.filter(a => a.name.toLowerCase().includes(q));
+    const docs = DOCS.filter(d => (d.party+' '+d.number+' '+d.ident).toLowerCase().includes(q)).slice(0,6);
+    let html = '';
+    if (areas.length) html += `<h3>Obszary</h3>` + areas.map(a=>`<a href="${a.href}"><span class="ai"><i data-lucide="${a.icon}"></i></span><span class="t"><b>${hl(a.name,q)}</b><small>${a.desc}</small></span></a>`).join('');
+    if (av.length) html += `<h3>Dostępność</h3>` + av.map(a=>`<a href="${a.href}"><span class="ai"><i data-lucide="${a.icon}"></i></span><span class="t"><b>${hl(a.name,q)}</b><small>Następny krok: ${a.next}</small></span>${H.chip(a.status)}</a>`).join('');
+    if (docs.length) html += `<h3>Dokumenty w rejestrach VAT</h3>` + docs.map(d=>`<a href="03-podglad.html?k=${d.kind}&m=${d.month}"><span class="ai"><i data-lucide="${d.kind==='sales'?'arrow-up-right':'arrow-down-left'}"></i></span><span class="t"><b>${hl(d.party,q)} · ${hl(d.number,q)}</b><small>${d.date} · ${V.KINDS[d.kind].register} · ${V.fmt(d.gross)}</small></span></a>`).join('');
+    $('#res').innerHTML = html || `<div class="empty">Nic nie znaleziono dla „${V.esc(q)}”. Spróbuj nazwy obszaru, numeru dokumentu lub kontrahenta.</div>`;
+  }
+  V.icons();
+}
+$('#rows').innerHTML = H.AVAIL.map(i => `
+  <div class="row" data-row="${i.id}" role="button" tabindex="0" aria-expanded="false"><span class="nm"><i data-lucide="${i.icon}"></i>${i.name}</span>${H.chip(i.status)}<i data-lucide="chevron-down" class="chev"></i></div>
+  <div class="det" id="d-${i.id}" hidden>${H.conds(i)}<a class="btn sm ${i.id==='vat'?'pri':''}" href="${i.href}">${i.cta}</a></div>`).join('');
+
+$('#q').addEventListener('input', renderRes);
+document.addEventListener('click', e => { const r = e.target.closest('[data-row]'); if (!r) return; const d = $('#d-'+r.dataset.row); d.hidden = !d.hidden; r.setAttribute('aria-expanded', String(!d.hidden)); });
+document.addEventListener('keydown', e => {
+  const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  if (e.key==='/' && !typing){ e.preventDefault(); $('#q').focus(); }
+  else if (/^[1-4]$/.test(e.key) && !typing && !e.ctrlKey && !e.metaKey) location.href = H.AREAS[+e.key-1].href;
+  else if ((e.key==='Enter'||e.key===' ') && e.target.matches('[data-row]')){ e.preventDefault(); e.target.click(); }
+  else if (e.key==='Enter' && e.target.id==='q'){ const a = $('#res a'); if (a) location.href = a.href; }
+});
+renderRes();
+V.bindMenus();
+V.icons();
+</script>
+</body>
+</html>

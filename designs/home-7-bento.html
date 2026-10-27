@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obszary księgowe — Bento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/base.css">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<script src="shared/shell.js"></script>
+<script src="shared/home.js"></script>
+<style>
+.bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(150px,auto);gap:14px}
+.t{padding:18px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.t h2{margin:0;font-size:16px;font-weight:600}
+.t .k{color:var(--muted);font-size:12.5px}
+.t-vat{grid-column:span 2;grid-row:span 2;gap:14px}
+.t-vat .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.t-vat .ai{width:44px;height:44px;border-radius:13px;background:var(--navy-grad);color:#fff;display:grid;place-items:center}
+.t-vat h2{font-size:24px;letter-spacing:-.015em}
+.t-vat p{margin:0;color:var(--muted)}
+.chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:8px}
+.chart a{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;height:100%;justify-content:flex-end}
+.chart a span.b{width:100%;max-width:30px;border-radius:6px 6px 3px 3px;background:#C9D5EE;height:var(--h);min-height:4px;transition:background .15s}
+.chart a:hover span.b{background:#8FA6D6}
+.chart a.cur span.b{background:var(--navy-grad)}
+.chart a.none span.b{background:repeating-linear-gradient(90deg,#DCE1EA 0 3px,transparent 3px 6px);height:4px}
+.chart a small{font-size:11px;color:var(--muted)}
+.chart a.cur small{color:var(--navy2);font-weight:700}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kv div{background:#F2F5FB;border-radius:12px;padding:10px 12px}
+.kv small{display:block;color:var(--muted);font-size:12px}
+.kv b{font-size:16px;font-weight:600}
+.t-vat .ft{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:auto;flex-wrap:wrap}
+
+.t-per{grid-column:span 2;background:var(--navy-grad);color:#fff;border:0;box-shadow:0 16px 32px -20px rgba(21,39,77,.75)}
+.t-per .k{color:var(--navy-muted)}
+.t-per h2{font-size:22px;letter-spacing:-.015em}
+.t-per p{margin:0;color:var(--navy-muted);font-size:13.5px;max-width:52ch}
+.t-per .deco{position:absolute;right:-30px;bottom:-40px;font-size:150px;font-weight:700;letter-spacing:-.06em;color:rgba(255,255,255,.06);line-height:1;pointer-events:none}
+
+.t-ready{align-items:flex-start}
+.donut{width:84px;height:84px;position:relative}
+.donut svg{width:84px;height:84px;transform:rotate(-90deg)}
+.donut b{position:absolute;inset:0;display:grid;place-items:center;font-size:19px;font-weight:700}
+.t-ready p{margin:0;font-size:13px;color:var(--muted)}
+
+.t-ksef .big{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--warn)}
+.t-ksef p{margin:0;font-size:13px;color:var(--muted)}
+.t-ksef a{margin-top:auto;font-size:13px;font-weight:600;color:var(--navy2);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.t-ksef a:hover{text-decoration:underline}
+
+.t-area{cursor:default}
+.t-area .hd{display:flex;align-items:center;gap:10px}
+.t-area .ai{width:34px;height:34px;border-radius:10px;background:var(--hover);display:grid;place-items:center;color:var(--muted)}
+.t-area .go{margin-left:auto;color:var(--faint);text-decoration:none;display:grid;place-items:center;width:30px;height:30px;border-radius:8px}
+.t-area .go:hover{background:var(--hover);color:var(--ink)}
+.t-area.wide{grid-column:span 2}
+.it{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:8px;border-radius:10px;text-align:left;font-weight:500}
+.it:hover{background:var(--hover)}
+.it .chip{margin-left:auto}
+.t-area .soon{margin-top:auto;font-size:12.5px;color:var(--muted)}
+.t-note{grid-column:span 2;background:var(--warn-soft);border-color:#F3DDB8;color:#7A4300;flex-direction:row;align-items:center;gap:12px}
+.t-note svg{color:var(--warn);width:22px;height:22px}
+.t-note p{margin:0;font-size:13.5px}
+
+.dlg{border:0;padding:0;border-radius:20px;width:min(440px,calc(100vw - 24px));box-shadow:0 30px 70px rgba(21,39,77,.3);color:var(--ink)}
+.dlg::backdrop{background:rgba(21,39,77,.35);backdrop-filter:blur(2px)}
+.dlg .in{padding:22px;display:grid;gap:12px}
+.dlg .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.dlg h3{margin:0;font-size:20px}
+.dlg .x{border:0;background:var(--hover);width:34px;height:34px;border-radius:10px;display:grid;place-items:center}
+.dlg p{margin:0;color:var(--muted);font-size:13.5px}
+.dlg .acts{display:flex;justify-content:flex-end;gap:8px}
+.dlg[open]{animation:pop .2s cubic-bezier(.2,.8,.2,1)}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}}
+
+@media (max-width:1000px){ .bento{grid-template-columns:repeat(2,minmax(0,1fr))} .t-vat,.t-per,.t-note,.t-area.wide{grid-column:span 2} .t-vat{grid-row:auto} }
+@media (max-width:560px){ .bento{grid-template-columns:1fr} .t-vat,.t-per,.t-note,.t-area.wide{grid-column:auto} .kv{grid-template-columns:1fr 1fr} .chart{gap:3px} }
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<main class="wrap page-enter">
+  <div class="pg-h"><nav class="crumbs"><span>Ewidencje</span></nav><h1>Obszary księgowe</h1><p>Mapa dostępnych obszarów księgowych dla aktywnej organizacji.</p></div>
+  <section class="bento" id="bento"></section>
+</main>
+<dialog class="dlg" id="dlg"><div class="in" id="dlgIn"></div></dialog>
+<script>
+const V = VAT, H = HOME, $ = s => document.querySelector(s);
+Shell.mount({ home:true });
+const S = H.STATS, max = Math.max(...S.monthly.map(m=>m.gross));
+const pct = Math.round(H.READY.met/H.READY.total*100), C = 2*Math.PI*34;
+const item = i => `<button class="it" data-av="${i.id}"><i data-lucide="${i.icon}"></i>${i.name}${H.chip(i.status)}</button>`;
+const areaTile = (id, wide) => { const a = H.area(id); const items = H.availOf(id);
+  return `<article class="card t t-area ${wide?'wide':''}"><div class="hd"><span class="ai"><i data-lucide="${a.icon}"></i></span><div><h2>${a.name}</h2><span class="k">${a.desc}</span></div><a class="go" href="${a.href}" aria-label="Przejdź do: ${a.name}"><i data-lucide="arrow-up-right"></i></a></div>
+    <div>${items.map(item).join('')}</div><span class="soon">${H.chip('soon')}</span></article>`; };
+
+$('#bento').innerHTML = `
+  <article class="card t t-vat">
+    <div class="hd"><div><span class="k">Obszar z danymi · ${H.ORG}</span><h2 class="vat-title">Rejestry i VAT</h2></div><span class="ai"><i data-lucide="receipt-text"></i></span></div>
+    <p>${H.AREAS[0].desc}</p>
+    <div><span class="k">Sprzedaż brutto w 2026 — kliknij miesiąc, aby otworzyć rejestr</span>
+      <div class="chart">${S.monthly.map((m,i)=> m.count
+        ? `<a href="03-podglad.html?m=${i}" class="${i===9?'cur':''}" title="${V.cap(V.MONTHS[i])}: ${V.docs(m.count)}, ${V.fmt(m.gross)}"><span class="b" style="--h:${Math.round(m.gross/max*100)}%"></span><small>${V.MONTHS_SHORT[i]}</small></a>`
+        : `<a class="none" aria-disabled="true" tabindex="-1"><span class="b"></span><small>${V.MONTHS_SHORT[i]}</small></a>`).join('')}</div></div>
+    <div class="kv"><div><small>Sprzedaż · paź</small><b>${V.docs(S.salesCount)}</b></div><div><small>VAT należny</small><b>${V.fmt(S.salesVat)}</b></div><div><small>VAT naliczony</small><b>${V.fmt(S.purchVat)}</b></div></div>
+    <div class="ft"><button class="it" data-av="vat" style="width:auto;padding:4px 6px">${H.chip('confirm')}<span style="font-size:13px;color:var(--muted)">Szczegóły</span></button><a class="btn pri" href="03-podglad.html">Otwórz rejestry<i data-lucide="arrow-right"></i></a></div>
+  </article>
+  <article class="t t-per card"><span class="k">Okres rozliczeniowy</span><h2>${H.PERIOD.title}</h2><p>${H.PERIOD.text}</p><span>${H.chip(H.PERIOD.status)}</span><span class="deco">2026</span></article>
+  <article class="card t t-ready"><span class="k">Dostępność obszarów</span>
+    <div class="donut"><svg viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="none" stroke="#E6EAF1" stroke-width="10"/><circle cx="42" cy="42" r="34" fill="none" stroke="#1F3B76" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct/100)}"/></svg><b>${pct}%</b></div>
+    <p>${H.READY.met} z ${H.READY.total} warunków spełnionych. ${H.AVAIL_TEXT}</p></article>
+  <article class="card t t-ksef"><span class="k">KSeF · październik</span><span class="big">${S.ksefMissing}</span><p>dokumentów bez potwierdzenia w KSeF</p><a href="03-podglad.html">Sprawdź w rejestrze<i data-lucide="arrow-right" style="width:15px;height:15px"></i></a></article>
+  ${areaTile('ksiegowania', true)}
+  ${areaTile('majatek')}
+  ${areaTile('kontrole')}
+  <article class="card t t-note"><i data-lucide="info"></i><p>${H.NOTE}</p></article>`;
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-av]'); if (b){
+    const i = H.AVAIL.find(x=>x.id===b.dataset.av), a = H.area(i.area);
+    $('#dlgIn').innerHTML = `<div class="hd"><div><span style="color:var(--muted);font-size:12.5px">Dostępność · ${a.name}</span><h3>${i.name}</h3></div><button class="x" data-close aria-label="Zamknij"><i data-lucide="x"></i></button></div>
+      ${H.chip(i.status)}<p>Następny krok: <b style="color:var(--ink)">${i.next}</b></p>${H.conds(i)}<p style="font-size:12.5px">${H.AVAIL_TEXT}</p>
+      <div class="acts"><button class="btn" data-close>Zamknij</button><a class="btn ${i.id==='vat'?'pri':''}" href="${i.href}">${i.cta}</a></div>`;
+    V.icons(); $('#dlg').showModal(); return;
+  }
+  if (e.target.closest('[data-close]') || e.target.id==='dlg') $('#dlg').close();
+});
+V.bindMenus();
+V.icons();
+</script>
+</body>
+</html>

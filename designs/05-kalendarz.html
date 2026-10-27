@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rejestry i VAT — Kalendarz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<style>
+:root{
+  --bg:#F3F2F8;--card:#fff;--ink:#1D1B3A;--muted:#66637F;--faint:#A19EB5;--line:#E6E4EF;--hover:#F7F6FB;
+  --v:#5B4BDB;--v-ink:#3F31B5;--v1:#F0EEFD;--v2:#D9D4FA;--v3:#AFA5F2;--v4:#7E70E6;
+  --warn:#A86500;--warn-soft:#FFF2DC;--ok:#1C7C5A;--err:#C42B46;--err-soft:#FDEBEF;
+  --toast-bg:#1D1B3A;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{overflow-x:clip}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 "Bricolage Grotesque",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--v);outline-offset:2px}
+svg.lucide{width:18px;height:18px;flex:none}
+.wrap{max-width:1300px;margin:0 auto;padding:28px 24px 100px;display:grid;grid-template-columns:372px minmax(0,1fr);gap:24px;align-items:start}
+.side{position:sticky;top:20px;display:grid;gap:14px;min-width:0}
+.side>*{min-width:0}
+.tot .big{overflow-wrap:anywhere}
+.org{margin:0;font-size:14px;color:var(--muted)}
+h1{margin:0;font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.02em}
+.status{display:flex;gap:6px;margin-top:10px;position:relative;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.demo{background:var(--ink);color:#fff}
+.pop{position:absolute;left:0;top:calc(100% + 8px);z-index:30;width:min(330px,calc(100vw - 32px));background:var(--card);border-radius:16px;box-shadow:0 18px 44px rgba(29,27,58,.18);padding:16px;font-size:14px}
+.pop p{margin:0 0 8px;color:var(--muted)} .pop p:last-child{margin:0} .pop b{color:var(--ink)}
+
+.kind{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border-radius:14px;padding:4px;gap:4px}
+.kind button{border:0;background:none;border-radius:10px;padding:9px;font-weight:600;color:var(--muted);display:flex;gap:6px;justify-content:center;align-items:center}
+.kind button[aria-selected=true]{background:var(--v);color:#fff}
+
+/* calendar — the hero */
+.cal{background:var(--card);border-radius:20px;padding:16px}
+.calh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;position:relative}
+.calh .t{border:0;background:none;font-size:20px;font-weight:700;letter-spacing:-.01em;display:flex;gap:6px;align-items:center;padding:4px 8px;border-radius:10px}
+.calh .t:hover{background:var(--hover)}
+.calh .nav{display:flex;gap:2px}
+.ibtn{border:0;background:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
+.ibtn:hover{background:var(--hover);color:var(--ink)}
+.ibtn:disabled{opacity:.3;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.wd{font-size:12px;color:var(--faint);text-align:center;padding-bottom:4px}
+.d{aspect-ratio:1;border:0;border-radius:10px;background:var(--hover);display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:6px 7px;font-size:13px;font-weight:600;position:relative;color:var(--ink)}
+.d.out{visibility:hidden}
+.d.empty{background:none;color:var(--faint);font-weight:400;cursor:default}
+.d.l1{background:var(--v1)} .d.l2{background:var(--v2)} .d.l3{background:var(--v3);color:#fff} .d.l4{background:var(--v4);color:#fff}
+.d .c{font-size:11px;font-weight:500;opacity:.8}
+.d[aria-pressed=true]{outline:2.5px solid var(--ink);outline-offset:1px}
+.d:not(.empty):hover{filter:brightness(.96)}
+.legend{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px;color:var(--muted)}
+.legend .sc{display:flex;gap:3px;align-items:center}
+.legend .sc i{width:14px;height:14px;border-radius:4px;display:block}
+.allm{border:0;background:none;color:var(--v-ink);font-weight:600;font-size:13px;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+.mp{position:absolute;left:0;top:calc(100% + 6px);z-index:30;background:var(--card);border-radius:16px;box-shadow:0 18px 44px rgba(29,27,58,.18);padding:12px;width:300px}
+.mp .yr{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:8px}
+.mp .ms{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mp .ms button{border:0;border-radius:10px;padding:10px 6px;background:var(--hover);font-weight:600;display:grid;gap:2px}
+.mp .ms button small{font-size:11px;color:var(--muted);font-weight:400}
+.mp .ms button[aria-pressed=true]{background:var(--v);color:#fff}
+.mp .ms button[aria-pressed=true] small{color:#fff}
+.mp .ya{width:100%;margin-top:8px;border:0;background:var(--hover);border-radius:10px;padding:9px;font-weight:600}
+
+.tot{background:var(--card);border-radius:20px;padding:16px}
+.tot h2{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px}
+.tot .big{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.tot .big small{font-size:14px;color:var(--muted);font-weight:500;letter-spacing:0}
+.tot .two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.tot .two div{background:var(--hover);border-radius:12px;padding:8px 10px}
+.tot .two small{display:block;font-size:12px;color:var(--muted)}
+.tot .two b{font-size:16px}
+.rates{display:grid;gap:6px}
+.rates .r{display:grid;grid-template-columns:38px 1fr auto;gap:8px;align-items:center;font-size:13px}
+.rates .bar{height:8px;background:var(--hover);border-radius:4px;overflow:hidden}
+.rates .bar i{display:block;height:100%;background:var(--v);border-radius:4px}
+
+/* main */
+.main{display:grid;gap:14px;min-width:0}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--card);border-radius:14px;padding:0 14px;color:var(--faint);height:46px}
+.search input{flex:1;min-width:0;border:0;background:none;outline:0;height:100%;color:var(--ink)}
+.search:focus-within{box-shadow:0 0 0 2px var(--v)}
+.tb{height:46px;border:0;background:var(--card);border-radius:14px;padding:0 14px;display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.tb:hover{background:#fff;box-shadow:0 0 0 1px var(--line)}
+.tb.ic{width:46px;padding:0;justify-content:center}
+.tb.pri{background:var(--ink);color:#fff}
+.tb .n{background:var(--v);color:#fff;border-radius:999px;font-size:11px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 5px}
+.mw{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:240px;background:var(--card);border-radius:16px;box-shadow:0 18px 44px rgba(29,27,58,.18);padding:6px}
+.menu button,.menu label{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;padding:9px 10px;border-radius:10px;text-align:left;font-size:14px;cursor:pointer}
+.menu button:hover,.menu label:hover{background:var(--hover)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:6px}
+.menu .mh{font-size:12px;color:var(--faint);padding:6px 10px 2px}
+.menu input{accent-color:var(--v)}
+.fp{width:min(360px,calc(100vw - 32px));padding:14px;display:grid;gap:12px}
+.fp label.f{display:grid;gap:4px;font-size:12px;color:var(--muted);font-weight:600;padding:0}
+.fp label.f:hover{background:none}
+.fp select{height:42px;border:1px solid var(--line);border-radius:12px;padding:0 10px;font-size:14px;background:var(--card);color:var(--ink)}
+.fp .sr{display:flex;gap:6px;flex-wrap:wrap}
+.fp .sr label{width:auto;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px}
+.fp .sr label:has(input:checked){background:var(--v1);border-color:var(--v);color:var(--v-ink)}
+.fp .sr input{display:none}
+.fp .row{display:flex;justify-content:space-between;gap:8px}
+.actchips{display:flex;gap:6px;flex-wrap:wrap}
+.ac{display:inline-flex;align-items:center;gap:4px;background:var(--v1);color:var(--v-ink);border-radius:999px;padding:4px 6px 4px 12px;font-size:13px;font-weight:600}
+.ac button{border:0;background:none;display:grid;padding:2px;border-radius:50%;color:inherit}
+.ac button svg{width:14px;height:14px}
+
+.list{background:var(--card);border-radius:20px;overflow:hidden}
+.lh{display:flex;justify-content:space-between;align-items:baseline;padding:16px 18px 10px;gap:10px;flex-wrap:wrap}
+.lh h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em}
+.lh span{color:var(--muted);font-size:14px}
+.thead,.row{display:grid;grid-template-columns:minmax(110px,1.1fr) 92px minmax(150px,1.3fr) 150px minmax(90px,.7fr) 120px 32px;gap:12px;align-items:center;padding:0 18px}
+.thead{font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:4px}
+.thead button{border:0;background:none;padding:6px 0;font-weight:600;display:flex;gap:4px;align-items:center;color:inherit}
+.thead button svg{width:13px;height:13px;opacity:.4}
+.thead button[aria-pressed=true]{color:var(--ink)} .thead button[aria-pressed=true] svg{opacity:1}
+.thead .r{justify-content:flex-end}
+.row{border:0;background:none;width:100%;text-align:left;border-bottom:1px solid var(--line);padding-top:13px;padding-bottom:13px;font-size:14px}
+.row:hover{background:var(--hover)}
+.row[aria-expanded=true]{background:var(--v1)}
+.row .p{font-weight:600}
+.row .m{color:var(--muted)}
+.row .g{text-align:right;font-weight:700}
+.row .g.neg{color:var(--err)}
+.ks{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--warn);background:var(--warn-soft);border-radius:999px;padding:2px 9px;white-space:nowrap}
+.ks.ok{color:var(--ok);background:#E2F4EC}
+.chev{color:var(--faint);transition:transform .2s;display:grid;place-items:center}
+.row[aria-expanded=true] .chev{transform:rotate(180deg)}
+.det{background:var(--v1);padding:4px 18px 18px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr) 1.5fr;gap:12px}
+.det div{background:var(--card);border-radius:12px;padding:10px 12px}
+.det small{display:block;font-size:12px;color:var(--muted)}
+.det b{font-weight:600;font-size:14px;word-break:break-all}
+.det .ln{display:flex;justify-content:space-between;font-size:13px}
+.lf{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+.pg{display:flex;align-items:center;gap:4px}
+.pg button{border:0;background:var(--hover);width:34px;height:34px;border-radius:10px;display:grid;place-items:center}
+.pg button:disabled{opacity:.35;cursor:default}
+.pg span{min-width:48px;text-align:center;color:var(--ink);font-weight:600}
+.lf select{border:0;background:var(--hover);border-radius:10px;height:34px;padding:0 8px;font-weight:500}
+
+.state{padding:60px 24px;display:grid;justify-items:center;text-align:center;gap:8px}
+.state .ic{width:60px;height:60px;border-radius:18px;background:var(--v1);color:var(--v);display:grid;place-items:center}
+.state .ic svg{width:28px;height:28px}
+.state h3{margin:8px 0 0;font-size:20px}
+.state p{margin:0;color:var(--muted);max-width:400px}
+.state .a{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.state.err .ic{background:var(--err-soft);color:var(--err)}
+.btn{border:0;height:42px;padding:0 16px;border-radius:12px;background:var(--hover);font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.btn.pri{background:var(--v);color:#fff}
+.skel{height:14px;border-radius:7px;background:linear-gradient(90deg,#EEEDF5,#F8F7FB,#EEEDF5);background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+
+@media (max-width:1180px){
+  .thead,.row{grid-template-columns:minmax(110px,1.2fr) 92px minmax(150px,1.3fr) 150px 120px 32px}
+  .c-ident{display:none!important}
+  .det{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:980px){
+  .wrap{grid-template-columns:1fr;gap:16px}
+  .side{position:static;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start}
+  .tot .big{font-size:24px}
+  .tot .two{grid-template-columns:1fr}
+  .side>.hd,.side>.kind{grid-column:1/-1}
+}
+@media (max-width:700px){
+  .wrap{padding:18px 16px 100px}
+  .side{grid-template-columns:1fr}
+  h1{font-size:28px}
+  .tools .tx{display:none}
+  .search{flex-basis:100%;order:-1}
+  .tools .sp{flex:1}
+  .thead{display:none}
+  .row{grid-template-columns:1fr auto;gap:2px 10px;padding:13px 16px}
+  .row .p{grid-column:1}
+  .row .g{grid-column:2;grid-row:1}
+  .row .c-date{grid-column:2;grid-row:2;text-align:right;font-size:13px}
+  .row .c-number{grid-column:1;grid-row:2;font-size:13px}
+  .row .c-ksef{grid-column:1}
+  .row .chev{display:none}
+  .det{grid-template-columns:1fr 1fr;padding:4px 12px 14px}
+  .det .wide{grid-column:1/-1}
+  .lf{justify-content:center}
+  .d{padding:4px 5px;border-radius:8px;font-size:12px}
+  .d .c{font-size:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="side">
+    <div class="hd">
+      <p class="org">Onsaldo Preview Sp. z o.o.</p>
+      <h1>Rejestry i VAT</h1>
+      <div class="status">
+        <button class="chip warn" data-menu-toggle="stPop" aria-expanded="false"><i data-lucide="info"></i>Wymaga potwierdzenia</button>
+        <span class="chip demo">DEMO</span>
+        <div class="pop js-menu" id="stPop" hidden>
+          <p><b>Kontekst VAT wymaga potwierdzenia.</b> Poniżej wyłącznie dane demonstracyjne, nie ewidencja organizacji.</p>
+          <p>Sprzedaż i zakupy w wybranym okresie — podgląd danych demonstracyjnych.</p>
+        </div>
+      </div>
+    </div>
+    <div class="kind" role="tablist">
+      <button role="tab" data-kind="sales" aria-selected="true"><i data-lucide="arrow-up-right"></i>Sprzedaż</button>
+      <button role="tab" data-kind="purchases" aria-selected="false"><i data-lucide="arrow-down-left"></i>Zakupy</button>
+    </div>
+    <section class="cal" id="cal" aria-label="Kalendarz dokumentów"></section>
+    <section class="tot" id="tot" aria-label="Podsumowanie"></section>
+  </aside>
+
+  <main class="main">
+    <div class="tools">
+      <label class="search"><i data-lucide="search"></i><input id="q" type="search" placeholder="Szukaj: kontrahent, numer, KSeF, identyfikator" aria-label="Szukaj"></label>
+      <span class="sp"></span>
+      <div class="mw">
+        <button class="tb" data-menu-toggle="fMenu" aria-expanded="false"><i data-lucide="sliders-horizontal"></i><span class="tx">Filtry</span><span class="n" id="fN" hidden></span></button>
+        <div class="menu js-menu" id="fMenu" hidden></div>
+      </div>
+      <div class="mw">
+        <button class="tb ic" data-menu-toggle="more" aria-expanded="false" aria-label="Więcej działań"><i data-lucide="ellipsis"></i></button>
+        <div class="menu js-menu" id="more" hidden></div>
+      </div>
+      <div class="mw">
+        <button class="tb pri" data-menu-toggle="exp" aria-expanded="false"><i data-lucide="download"></i><span class="tx">Eksportuj</span></button>
+        <div class="menu js-menu" id="exp" hidden>
+          <button data-act="Pobieranie CSV…"><i data-lucide="file-text"></i>CSV</button>
+          <button data-act="Pobieranie XLSX…"><i data-lucide="sheet"></i>XLSX</button>
+          <button data-act="Pobieranie PDF…"><i data-lucide="file"></i>PDF</button>
+        </div>
+      </div>
+    </div>
+    <div class="actchips" id="chips"></div>
+    <section class="list" id="list"></section>
+  </main>
+</div>
+
+<script>
+const V = VAT, $ = s => document.querySelector(s);
+const MONTH_GEN = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+const WEEK = ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
+const S = { kind:'sales', year:2026, month:9, day:null, op:'all', jpk:'all', series:[], q:'', sort:{key:'date',dir:1}, page:1, size:10, open:null, demo:'data', loading:false,
+  hide:{} };
+const F = () => ({ op:S.op, jpk:S.jpk, series:S.series });
+const nF = () => (S.op!=='all')+(S.jpk!=='all')+S.series.length;
+
+function renderCal(){
+  const m = S.month ?? 0;
+  const ds = S.demo==='data' ? V.dayStats(S.kind, S.year, m, F()) : {};
+  const max = Math.max(1, ...Object.values(ds).map(x=>Math.abs(x.gross)));
+  const first = (new Date(S.year, m, 1).getDay()+6)%7;
+  const days = new Date(S.year, m+1, 0).getDate();
+  const ms = S.demo==='data' ? V.monthStats(S.kind, S.year, F()) : V.MONTHS.map(()=>({count:0}));
+  let cells = V.WEEKDAYS.map(w=>`<div class="wd">${w.slice(0,2)}</div>`).join('');
+  for (let i=0;i<first;i++) cells += `<span class="d out"></span>`;
+  for (let d=1; d<=days; d++){
+    const s = ds[d];
+    const lvl = s ? 1+Math.min(3,Math.floor(Math.abs(s.gross)/max*3.999)) : 0;
+    cells += s ? `<button class="d l${lvl}" data-day="${d}" aria-pressed="${S.day===d}" title="${d} ${MONTH_GEN[m]}: ${V.docs(s.count)}, ${V.fmt(s.gross)}">${d}<span class="c">${s.count} dok.</span></button>`
+               : `<span class="d empty">${d}</span>`;
+  }
+  $('#cal').innerHTML = `
+    <div class="calh">
+      <button class="t" data-menu-toggle="mp" aria-expanded="false">${V.cap(V.MONTHS[m])} ${S.year}<i data-lucide="chevron-down"></i></button>
+      <div class="nav"><button class="ibtn" data-step="-1" aria-label="Poprzedni miesiąc"><i data-lucide="chevron-left"></i></button><button class="ibtn" data-step="1" aria-label="Następny miesiąc"><i data-lucide="chevron-right"></i></button></div>
+      <div class="mp js-menu" id="mp" hidden>
+        <div class="yr"><button class="ibtn" data-y="-1" ${S.year<=2025?'disabled':''} aria-label="Poprzedni rok"><i data-lucide="chevron-left"></i></button>${S.year}<button class="ibtn" data-y="1" ${S.year>=2026?'disabled':''} aria-label="Następny rok"><i data-lucide="chevron-right"></i></button></div>
+        <div class="ms">${V.MONTHS_SHORT.map((x,i)=>`<button data-m="${i}" aria-pressed="${S.month===i}">${x}<small>${ms[i].count?ms[i].count+' dok.':'—'}</small></button>`).join('')}</div>
+        <button class="ya" data-m="all">Cały rok ${S.year}${S.month==null?' ✓':''}</button>
+      </div>
+    </div>
+    ${S.month==null ? `<div class="state" style="padding:24px 8px"><p>Wybrano cały rok ${S.year}. Wybierz miesiąc, aby zobaczyć dni.</p></div>` : `<div class="grid">${cells}</div>`}
+    <div class="legend">${S.day ? `<button class="allm" data-day="0">Pokaż cały miesiąc</button>` : `<span>Kliknij dzień, aby zawęzić listę</span>`}
+      <span class="sc">mniej<i style="background:var(--v1)"></i><i style="background:var(--v2)"></i><i style="background:var(--v3)"></i><i style="background:var(--v4)"></i>więcej</span></div>`;
+}
+
+function renderTot(t){
+  if (S.demo==='error'){ $('#tot').innerHTML = `<h2>Podsumowanie</h2><p style="margin:0;color:var(--muted)">Kwoty pojawią się po wczytaniu rejestru.</p>`; return; }
+  const maxR = Math.max(1, ...t.byRate.map(r=>Math.abs(r.net)));
+  $('#tot').innerHTML = `<h2>${S.day ? `${S.day} ${MONTH_GEN[S.month]}` : S.month==null ? `Cały rok ${S.year}` : V.cap(V.MONTHS[S.month])+' '+S.year} · brutto</h2>
+    <div class="big">${V.fmt(t.gross)} <small>${V.docs(t.count)}</small></div>
+    <div class="two"><div><small>Netto</small><b>${V.fmt(t.net)}</b></div><div><small>VAT</small><b>${V.fmt(t.vat)}</b></div></div>
+    <h2>Kwoty według stawek VAT</h2>
+    <div class="rates">${t.byRate.length ? t.byRate.map(r=>`<div class="r"><span>${r.rate}</span><span class="bar"><i style="width:${Math.abs(r.net)/maxR*100}%"></i></span><b>${V.fmt(r.vat)}</b></div>`).join('') : '<span style="color:var(--faint);font-size:13px">Brak kwot</span>'}</div>`;
+}
+
+function renderMenus(){
+  const opt=(a,v)=>`<option value="all">Wszystkie</option>`+a.map(([k,l])=>`<option value="${k}" ${k===v?'selected':''}>${l}</option>`).join('');
+  $('#fMenu').innerHTML = `<div class="fp">
+    <label class="f">Rok<select id="fYear">${[2025,2026].map(y=>`<option ${y===S.year?'selected':''}>${y}</option>`).join('')}</select></label>
+    <label class="f">Miesiąc<select id="fMonth"><option value="all">Cały rok</option>${V.MONTHS.map((x,i)=>`<option value="${i}" ${i===S.month?'selected':''}>${x}</option>`).join('')}</select></label>
+    <label class="f">Rodzaj operacji<select id="fOp">${opt(V.OPS[S.kind],S.op)}</select></label>
+    <label class="f">Kod JPK V7<select id="fJpk">${opt(V.JPK,S.jpk)}</select></label>
+    <div><div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px">Serie dokumentów</div><div class="sr">${V.SERIES[S.kind].map(s=>`<label><input type="checkbox" data-series="${s}" ${S.series.includes(s)?'checked':''}>${V.SERIES_LABEL[s]}</label>`).join('')}</div></div>
+    <div class="row"><button class="btn" data-clear>Wyczyść filtry</button><button class="btn pri" data-close>Gotowe</button></div></div>`;
+  $('#more').innerHTML = `<button data-act="Otwarto podgląd wydruku"><i data-lucide="printer"></i>Drukuj</button>
+    <button data-act="Etykiety: zaznacz dokument, aby dodać etykietę"><i data-lucide="tag"></i>Etykiety</button><hr>
+    <div class="mh">Kolumny listy</div>${V.COLUMNS.map(c=>`<label><input type="checkbox" data-hide="${c.key}" ${S.hide[c.key]?'':'checked'} ${c.key==='party'?'disabled':''}>${c.label}</label>`).join('')}`;
+  $('#fN').hidden=!nF(); $('#fN').textContent=nF();
+  const ch=[];
+  if (S.day) ch.push(['day',`${S.day} ${MONTH_GEN[S.month]}`]);
+  if (S.op!=='all') ch.push(['op',V.OPS[S.kind].find(o=>o[0]===S.op)[1]]);
+  if (S.jpk!=='all') ch.push(['jpk','JPK '+V.JPK.find(o=>o[0]===S.jpk)[1]]);
+  S.series.forEach(s=>ch.push(['s:'+s,'Seria '+s]));
+  $('#chips').innerHTML = ch.map(([k,l])=>`<span class="ac">${l}<button data-rm="${k}" aria-label="Usuń ${l}"><i data-lucide="x"></i></button></span>`).join('');
+}
+
+function renderList(){
+  const L = $('#list');
+  if (S.loading){ L.innerHTML = `<div style="padding:18px;display:grid;gap:20px">${Array.from({length:7},()=>`<div class="skel" style="width:${50+Math.random()*45}%"></div>`).join('')}</div>`; renderTot(V.sum([])); return; }
+  if (S.demo==='error'){ renderTot(); L.innerHTML = `<div class="state err"><div class="ic"><i data-lucide="calendar-off"></i></div><h3>${V.ERROR_TITLE}</h3><p>${V.ERROR_TEXT}</p><div class="a"><button class="btn pri" data-retry><i data-lucide="rotate-cw"></i>Spróbuj ponownie</button></div></div>`; return; }
+  const { rows, totals } = V.query({ kind:S.kind, year:S.year, month:S.month, day:S.day, ...F(), q:S.q, sort:S.sort });
+  const list = S.demo==='empty' ? [] : rows;
+  renderTot(S.demo==='empty' ? V.sum([]) : totals);
+  const p = V.page(list, S.page, S.size); S.page=p.page;
+  const title = S.day ? `${WEEK[new Date(S.year,S.month,S.day).getDay()]}, ${S.day} ${MONTH_GEN[S.month]}` : S.month==null ? `Cały rok ${S.year}` : `Wszystkie dni ${MONTH_GEN[S.month]}`;
+  const filtered = nF()||S.q;
+  if (!list.length){
+    L.innerHTML = `<div class="lh"><h2>${title}</h2></div><div class="state"><div class="ic"><i data-lucide="${filtered?'search-x':'calendar-x'}"></i></div>
+      <h3>${filtered?'Brak dokumentów spełniających filtry':'Ten okres jest pusty'}</h3>
+      <p>${filtered?'Usuń część filtrów lub zmień wyszukiwaną frazę.':'W wybranym okresie nie ma dokumentów. Wybierz inny miesiąc w kalendarzu — podświetlone dni zawierają dokumenty.'}</p>
+      <div class="a">${filtered?'<button class="btn" data-clear>Wyczyść filtry</button>':''}<button class="btn pri" data-goto>Przejdź do października 2026</button></div></div>`;
+    return;
+  }
+  const show = k => !S.hide[k];
+  const sb = (k,l,cls='') => `<button data-sort="${k}" class="${cls}" aria-pressed="${S.sort.key===k}">${l}<i data-lucide="${S.sort.key===k?(S.sort.dir>0?'arrow-up':'arrow-down'):'arrow-up-down'}"></i></button>`;
+  L.innerHTML = `<div class="lh"><h2>${title}</h2><span>${V.docs(p.total)}</span></div>
+    <div class="thead"><span>${sb('party','Kontrahent')}</span><span>${show('date')?sb('date','Data'):''}</span><span>${show('number')?sb('number','Numer dokumentu'):''}</span><span>${show('ksef')?sb('ksef','Numer KSeF'):''}</span><span class="c-ident">${show('ident')?sb('ident','Identyfikator'):''}</span><span style="display:flex;justify-content:flex-end">${sb('gross','Brutto','r')}</span><span></span></div>
+    ${p.items.map(d=>`<button class="row" data-id="${d.id}" aria-expanded="${S.open===d.id}">
+      <span class="p">${V.esc(d.party)}</span><span class="m c-date">${show('date')?V.fmtDate(d.date,'short'):''}</span><span class="m c-number">${show('number')?d.number:''}</span>
+      <span class="c-ksef">${show('ksef')?(d.ksef?'<span class="ks ok">Potwierdzono</span>':'<span class="ks">Brak potwierdzenia</span>'):''}</span><span class="m c-ident">${show('ident')?d.ident:''}</span>
+      <span class="g ${d.gross<0?'neg':''}">${V.fmt(d.gross)}</span><span class="chev"><i data-lucide="chevron-down"></i></span></button>
+      ${S.open===d.id?`<div class="det"><div><small>Data</small><b>${d.date}</b></div><div><small>Identyfikator</small><b>${d.ident}</b></div><div><small>Rodzaj operacji</small><b>${d.opLabel}</b></div><div><small>Kod JPK V7 · seria</small><b>${d.jpk||'Bez kodu'} · ${d.series}</b></div>
+        <div class="wide"><small>Numer KSeF</small><b>${d.ksef||'Brak potwierdzenia'}</b>${d.lines.map(l=>`<div class="ln"><span>${l.rate} netto ${V.fmtNum(l.net)}</span><span>VAT ${V.fmtNum(l.vat)}</span></div>`).join('')}</div></div>`:''}`).join('')}
+    <div class="lf"><span>${p.from}–${p.to} z ${p.total}</span><div class="pg"><button data-pg="-1" ${p.page<=1?'disabled':''} aria-label="Poprzednia strona"><i data-lucide="chevron-left"></i></button><span>${p.page} / ${p.pages}</span><button data-pg="1" ${p.page>=p.pages?'disabled':''} aria-label="Następna strona"><i data-lucide="chevron-right"></i></button></div>
+      <select id="size" aria-label="Na stronie">${[10,25,50].map(n=>`<option value="${n}" ${n===S.size?'selected':''}>${n} na stronie</option>`).join('')}</select></div>`;
+}
+
+function render(){ renderCal(); renderMenus(); renderList(); V.icons(); }
+function clear(){ S.op='all'; S.jpk='all'; S.series=[]; S.q=''; $('#q').value=''; S.day=null; S.page=1; }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.kind){ S.kind=t.dataset.kind; S.op='all'; S.series=[]; S.day=null; S.page=1; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-selected',String(x===t))); render(); }
+  else if (t.dataset.day){ const d=+t.dataset.day; S.day = !d || S.day===d ? null : d; S.page=1; S.open=null; render(); }
+  else if (t.dataset.step){ let m=(S.month??0)+ +t.dataset.step, y=S.year; if(m<0){m=11;y--;} if(m>11){m=0;y++;} if(y>=2025&&y<=2026){S.month=m;S.year=y;S.day=null;S.page=1;} render(); }
+  else if (t.dataset.m){ S.month=t.dataset.m==='all'?null:+t.dataset.m; S.day=null; S.page=1; V.closeMenus(); render(); }
+  else if (t.dataset.y){ S.year+= +t.dataset.y; S.day=null; render(); $('#mp').hidden=false; }
+  else if (t.dataset.sort){ const k=t.dataset.sort; S.sort={key:k,dir:S.sort.key===k?-S.sort.dir:1}; renderList(); V.icons(); }
+  else if (t.dataset.id){ S.open=S.open===t.dataset.id?null:t.dataset.id; renderList(); V.icons(); }
+  else if (t.dataset.pg){ S.page+= +t.dataset.pg; S.open=null; renderList(); V.icons(); }
+  else if (t.dataset.rm){ const k=t.dataset.rm; if(k==='day')S.day=null; else if(k==='op')S.op='all'; else if(k==='jpk')S.jpk='all'; else S.series=S.series.filter(x=>x!==k.slice(2)); render(); }
+  else if ('clear' in t.dataset){ clear(); render(); }
+  else if ('close' in t.dataset) V.closeMenus();
+  else if ('goto' in t.dataset){ clear(); S.year=2026; S.month=9; render(); }
+  else if ('retry' in t.dataset){ demo.set('data'); S.demo='data'; S.loading=true; render(); setTimeout(()=>{S.loading=false; render();},900); }
+  else if (t.dataset.act){ V.closeMenus(); V.toast(t.dataset.act); }
+});
+document.addEventListener('change', e => {
+  const t=e.target, keep = t.closest('.js-menu')?.id;
+  if (t.id==='fYear') S.year=+t.value;
+  else if (t.id==='fMonth'){ S.month=t.value==='all'?null:+t.value; S.day=null; }
+  else if (t.id==='fOp') S.op=t.value;
+  else if (t.id==='fJpk') S.jpk=t.value;
+  else if (t.dataset.series) S.series=t.checked?[...S.series,t.dataset.series]:S.series.filter(x=>x!==t.dataset.series);
+  else if (t.dataset.hide) S.hide[t.dataset.hide]=!t.checked;
+  else if (t.id==='size') S.size=+t.value;
+  else return;
+  S.page=1; render(); if (keep) document.getElementById(keep).hidden=false;
+});
+$('#q').addEventListener('input', e => { S.q=e.target.value; S.page=1; renderList(); V.icons(); });
+
+V.bindMenus();
+const demo = V.demoBar(s => { S.demo=s; render(); });
+render();
+</script>
+</body>
+</html>

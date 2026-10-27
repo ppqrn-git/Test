@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rejestry i VAT — Oś roku</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<style>
+:root{
+  --bg:#F5F7F6;--surface:#fff;--ink:#14201D;--muted:#5E6C68;--faint:#8A9793;--line:#E3E9E6;
+  --brand:#0E7A66;--brand-ink:#0A5B4C;--brand-soft:#E3F3EE;--brand-mid:#9FD3C5;
+  --warn:#8A5A00;--warn-soft:#FFF3D6;--err:#B42318;--err-soft:#FDECEA;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{overflow-x:clip}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 "Instrument Sans",system-ui,sans-serif;font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+svg.lucide{width:18px;height:18px;flex:none}
+.page{max-width:1180px;margin:0 auto;padding:32px 24px 96px}
+
+/* header */
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.org{margin:0 0 2px;color:var(--brand-ink);font-weight:600;font-size:14px}
+h1{margin:0;font-size:clamp(28px,4vw,40px);line-height:1.1;letter-spacing:-.02em;font-weight:700}
+.status{position:relative;display:flex;gap:8px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;border:1px solid transparent;background:none}
+.pill.warn{background:var(--warn-soft);color:var(--warn);border-color:#F2DFAE}
+.pill.demo{border-color:var(--line);color:var(--muted);background:var(--surface)}
+.pill svg{width:15px;height:15px}
+.pop{position:absolute;right:0;top:calc(100% + 8px);width:min(340px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:0 12px 32px rgba(20,32,29,.12);z-index:30;font-size:14px}
+.pop strong{display:block;margin-bottom:4px}
+.pop p{margin:0 0 8px;color:var(--muted)}
+.pop p:last-child{margin:0}
+
+/* toolbar */
+.bar{display:flex;gap:8px;align-items:center;margin:28px 0 16px;flex-wrap:wrap}
+.seg{display:inline-flex;background:#E9EEEC;border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:8px 14px;border-radius:8px;font-weight:600;font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.seg button[aria-selected=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 12px;height:42px;color:var(--faint)}
+.search input{border:0;outline:0;background:none;flex:1;min-width:0;height:100%;color:var(--ink)}
+.search:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.btn{height:42px;display:inline-flex;align-items:center;gap:8px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;white-space:nowrap}
+.btn:hover{border-color:#C9D3CF}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-ink)}
+.btn.icon{width:42px;padding:0;justify-content:center}
+.count{background:var(--brand);color:#fff;border-radius:999px;font-size:11px;min-width:18px;height:18px;display:inline-grid;place-items:center;padding:0 5px}
+.menuwrap{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 6px);min-width:230px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:6px;box-shadow:0 12px 32px rgba(20,32,29,.12);z-index:30}
+.menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:none;padding:9px 10px;border-radius:8px;text-align:left;font-size:14px}
+.menu button:hover{background:var(--bg)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.menu .hint{margin-left:auto;color:var(--faint);font-size:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 16px}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--brand-mid);background:var(--brand-soft);color:var(--brand-ink);border-radius:999px;padding:4px 6px 4px 10px;font-size:13px;font-weight:500}
+.chip button{border:0;background:none;padding:2px;border-radius:50%;display:grid;color:inherit}
+.chip button svg{width:14px;height:14px}
+.chip.clear{background:none;border-color:transparent;color:var(--muted);padding:4px 8px;text-decoration:underline;cursor:pointer}
+
+/* year axis — the hero */
+.axis{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px 12px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:end}
+.year{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding-bottom:6px}
+.year .yl{font-size:13px;color:var(--muted)}
+.year .yv{display:flex;align-items:center;gap:2px;font-size:22px;font-weight:700}
+.year button{border:0;background:none;padding:4px;border-radius:6px;display:grid;color:var(--muted)}
+.year button:hover{background:var(--bg);color:var(--ink)}
+.year button:disabled{opacity:.3;cursor:default}
+.bars{position:relative;display:grid;grid-template-columns:repeat(12,minmax(40px,1fr)) minmax(72px,auto);gap:6px;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.m{border:0;background:none;display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:6px 4px 4px;border-radius:10px;min-width:40px}
+.m:hover{background:var(--bg)}
+.m .track{height:84px;display:flex;align-items:flex-end;justify-content:center}
+.m .fill{width:min(100%,28px);height:var(--h);min-height:3px;border-radius:5px 5px 2px 2px;background:var(--brand-mid);transition:height .35s cubic-bezier(.2,.7,.2,1)}
+.m.none .fill{background:repeating-linear-gradient(90deg,var(--line) 0 4px,transparent 4px 7px);height:3px}
+.m .ml{font-size:13px;color:var(--muted);text-align:center}
+.m[aria-pressed=true]{background:var(--brand-soft)}
+.m[aria-pressed=true] .fill{background:var(--brand)}
+.m[aria-pressed=true] .ml{color:var(--brand-ink);font-weight:700}
+.m.all .track{align-items:center;font-size:13px;font-weight:600;color:var(--muted)}
+.m.all .track span{border:1px dashed var(--line);border-radius:8px;padding:6px 8px;line-height:1.2}
+.m.all[aria-pressed=true] .track span{border-color:var(--brand);color:var(--brand-ink)}
+
+/* summary */
+.sum{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:end;margin:28px 0 20px}
+.sum h2{margin:0 0 10px;font-size:22px;letter-spacing:-.01em}
+.kpi{display:flex;gap:32px;margin:0;flex-wrap:wrap}
+.kpi div{min-width:0}
+.kpi dt{font-size:13px;color:var(--muted)}
+.kpi dd{margin:0;font-size:24px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.kpi .vat dd{color:var(--brand-ink)}
+.rates .rl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:8px}
+.stack{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line);gap:2px}
+.stack span{display:block;height:100%}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.legend b{font-weight:600}
+
+/* table */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:auto}
+td{white-space:nowrap}
+table{width:100%;border-collapse:collapse}
+th{font-size:13px;font-weight:600;color:var(--muted);text-align:left;padding:0;border-bottom:1px solid var(--line);background:#FAFBFB}
+th button{border:0;background:none;padding:12px 16px;display:flex;align-items:center;gap:4px;width:100%;text-align:left;font-weight:600;color:inherit}
+th button svg{width:14px;height:14px;opacity:.35}
+th[aria-sort] button{color:var(--ink)}
+th[aria-sort] button svg{opacity:1}
+th.num,td.num{text-align:right}
+th.num button{justify-content:flex-end}
+td{padding:14px 16px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+tbody tr.row{cursor:pointer}
+tbody tr.row:hover td{background:#FAFCFB}
+tr.row[aria-expanded=true] td{background:var(--brand-soft);border-bottom-color:transparent}
+td.party{font-weight:600}
+td.mono{color:var(--muted)}
+.ks{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--warn);white-space:nowrap}
+.ks i{width:7px;height:7px;border-radius:50%;background:#E0A21B;display:inline-block}
+.ks.ok{color:var(--brand-ink)}
+.ks.ok i{background:var(--brand)}
+.chev{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;color:var(--faint);transition:transform .2s}
+tr[aria-expanded=true] .chev{transform:rotate(180deg);color:var(--brand-ink)}
+.detail td{background:var(--brand-soft);padding:0 16px 18px;white-space:normal}
+.detail .dg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 24px;background:var(--surface);border-radius:12px;padding:16px}
+.detail dt{font-size:12px;color:var(--muted)}
+.detail dd{margin:0;font-size:14px;font-weight:500;word-break:break-all}
+.detail .lines{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:4px}
+.detail .ln{display:grid;grid-template-columns:80px repeat(3,1fr);font-size:13px}
+.detail .ln.h{color:var(--muted)}
+.detail .ln span:not(:first-child){text-align:right}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.pager{display:flex;align-items:center;gap:8px}
+.pager .pg{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px}
+.pager .pg button{border:0;background:none;width:34px;height:34px;display:grid;place-items:center;color:var(--ink)}
+.pager .pg button:disabled{color:var(--line);cursor:default}
+.pager .pg span{padding:0 6px;color:var(--ink);font-weight:600;min-width:44px;text-align:center}
+.pager select{height:36px;border:1px solid var(--line);border-radius:10px;padding:0 8px;background:var(--surface);font-weight:500}
+
+/* states */
+.state{padding:56px 24px;text-align:center;display:grid;justify-items:center;gap:10px}
+.state .ic{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:var(--bg);color:var(--muted)}
+.state .ic svg{width:26px;height:26px}
+.state h3{margin:6px 0 0;font-size:18px}
+.state p{margin:0;color:var(--muted);max-width:420px}
+.state .acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.state.err .ic{background:var(--err-soft);color:var(--err)}
+.skel{height:14px;border-radius:6px;background:linear-gradient(90deg,#EEF2F0,#F7F9F8,#EEF2F0);background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(20,32,29,.28);z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(400px,100vw);background:var(--surface);z-index:41;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.drawer header{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 8px}
+.drawer h2{margin:0;font-size:20px}
+.drawer .body{padding:8px 20px;overflow:auto;flex:1;display:grid;gap:18px;align-content:start}
+.field{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.field select{height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:var(--surface);font-weight:500;color:var(--ink);font-size:15px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+fieldset{border:0;padding:0;margin:0}
+legend{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px;padding:0}
+.toggles{display:flex;flex-wrap:wrap;gap:8px}
+.toggles label{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer}
+.toggles input{accent-color:var(--brand);width:16px;height:16px;margin:0}
+.toggles label:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+.drawer footer{display:flex;gap:8px;padding:16px 20px;border-top:1px solid var(--line)}
+.drawer footer .btn{flex:1;justify-content:center}
+.cols{display:grid;gap:4px}
+.cols .c{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:6px 6px 6px 12px;font-size:14px}
+.cols .c label{flex:1;display:flex;gap:8px;align-items:center}
+.cols .c input{accent-color:var(--brand)}
+.cols .c button{border:0;background:none;padding:6px;border-radius:6px;display:grid;color:var(--muted)}
+.cols .c button:hover{background:var(--bg)}
+.cols .c button:disabled{opacity:.25}
+
+@media (max-width:1040px){th[data-k=ident],td[data-c=ident]{display:none}}
+@media (max-width:860px){
+  .sum{grid-template-columns:1fr;gap:18px}
+  .detail .dg{grid-template-columns:1fr 1fr}
+  .axis{grid-template-columns:1fr;gap:8px}
+  .year{flex-direction:row;align-items:center;justify-content:space-between;padding:0}
+}
+@media (max-width:720px){
+  .page{padding:20px 16px 96px}
+  .bar{display:grid;grid-template-columns:1fr auto auto;}
+  .bar .seg{grid-column:1/-1}
+  .bar .seg button{flex:1;justify-content:center}
+  .bar .search{grid-column:1/-1;order:-1;min-width:0}
+  .seg{display:flex}
+  .btn .tx{display:none}
+  #filtersBtn{justify-content:center}
+  #filtersBtn .tx{display:inline}
+  .btn{padding:0 12px}
+  .kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .kpi dd{font-size:16px;white-space:normal}
+  .axis{padding:14px 12px 8px}
+  .bars{grid-template-columns:repeat(12,44px) 72px;margin:0 -12px;padding:0 12px 4px}
+  /* table → list */
+  table,tbody{display:block}
+  thead{display:none}
+  tr.row{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  tr.row td{border:0;padding:0;background:none!important}
+  tr.row[aria-expanded=true]{background:var(--brand-soft)}
+  td[data-c=party]{grid-column:1}
+  td.num{grid-column:2;grid-row:1;font-weight:600}
+  td[data-c=number]{grid-column:1;font-size:13px}
+  td[data-c=date]{grid-column:2;grid-row:2;text-align:right;font-size:13px;color:var(--muted)}
+  td[data-c=ksef]{grid-column:1}
+  td[data-c=ident]{display:none!important}
+  td.ex{display:none}
+  tr.detail{display:block}
+  tr.detail td{display:block;padding:0 12px 14px}
+  .detail .dg{grid-template-columns:1fr 1fr;padding:12px}
+  .detail .ln{grid-template-columns:52px repeat(3,1fr)}
+  .foot{justify-content:center}
+  .drawer{top:auto;width:100%;max-height:88vh;border-radius:20px 20px 0 0;transform:translateY(100%)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="head">
+    <div>
+      <p class="org">Onsaldo Preview Sp. z o.o.</p>
+      <h1>Rejestry i VAT</h1>
+    </div>
+    <div class="status">
+      <button class="pill warn" data-menu-toggle="statusPop" aria-expanded="false"><i data-lucide="shield-alert"></i>Wymaga potwierdzenia</button>
+      <span class="pill demo" title="Dane demonstracyjne">DEMO</span>
+      <div class="pop js-menu" id="statusPop" hidden>
+        <strong>Kontekst VAT wymaga potwierdzenia</strong>
+        <p>Poniżej wyłącznie dane demonstracyjne, nie ewidencja organizacji.</p>
+        <p>Sprzedaż i zakupy w wybranym okresie — podgląd danych demonstracyjnych.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="bar">
+    <div class="seg" role="tablist" aria-label="Rejestr">
+      <button role="tab" data-kind="sales" aria-selected="true"><i data-lucide="receipt-text"></i>Rejestr sprzedaży</button>
+      <button role="tab" data-kind="purchases" aria-selected="false"><i data-lucide="wallet"></i>Rejestr zakupów</button>
+    </div>
+    <label class="search"><i data-lucide="search"></i><input id="q" type="search" placeholder="Szukaj kontrahenta, numeru, KSeF…" aria-label="Szukaj"></label>
+    <button class="btn" id="filtersBtn"><i data-lucide="list-filter"></i><span class="tx">Filtry</span><span class="count" id="fCount" hidden></span></button>
+    <div class="menuwrap">
+      <button class="btn primary" data-menu-toggle="exportMenu" aria-expanded="false"><i data-lucide="download"></i><span class="tx">Eksportuj</span></button>
+      <div class="menu js-menu" id="exportMenu" hidden>
+        <button data-act="Pobieranie CSV…"><i data-lucide="file-text"></i>Pobierz CSV</button>
+        <button data-act="Pobieranie XLSX…"><i data-lucide="sheet"></i>Pobierz XLSX</button>
+        <button data-act="Pobieranie PDF…"><i data-lucide="file"></i>Pobierz PDF</button>
+      </div>
+    </div>
+    <div class="menuwrap">
+      <button class="btn icon" data-menu-toggle="moreMenu" aria-label="Więcej działań" aria-expanded="false"><i data-lucide="ellipsis"></i></button>
+      <div class="menu js-menu" id="moreMenu" hidden>
+        <button data-act="Otwarto podgląd wydruku"><i data-lucide="printer"></i>Drukuj<span class="hint">Ctrl P</span></button>
+        <button data-act="Etykiety: wybierz dokumenty, aby je oznaczyć"><i data-lucide="tag"></i>Etykiety</button>
+        <hr>
+        <button id="colsBtn"><i data-lucide="columns-3"></i>Kolumny tabeli</button>
+      </div>
+    </div>
+  </div>
+  <div class="chips" id="chips"></div>
+
+  <section class="axis" aria-label="Okres">
+    <div class="year">
+      <span class="yl">Rok</span>
+      <span class="yv"><button id="yPrev" aria-label="Poprzedni rok"><i data-lucide="chevron-left"></i></button><span id="yVal">2026</span><button id="yNext" aria-label="Następny rok"><i data-lucide="chevron-right"></i></button></span>
+    </div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <div id="content"></div>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Filtry" aria-hidden="true">
+  <header><h2 id="drawerTitle">Filtry</h2><button class="btn icon" id="drawerClose" aria-label="Zamknij"><i data-lucide="x"></i></button></header>
+  <div class="body" id="drawerBody"></div>
+  <footer id="drawerFoot"></footer>
+</aside>
+
+<script>
+const V = VAT;
+const S = { kind:'sales', year:2026, month:9, op:'all', jpk:'all', series:[], q:'', sort:{key:'date',dir:1}, page:1, size:10, open:null, demo:'data', loading:false,
+  cols: V.COLUMNS.map(c => ({...c, on:true})) };
+const $ = s => document.querySelector(s);
+
+function filters(){ return { op:S.op, jpk:S.jpk, series:S.series }; }
+
+function renderBars(){
+  const stats = V.monthStats(S.kind, S.year, filters());
+  const max = Math.max(1, ...stats.map(s => Math.abs(s.vat)));
+  $('#bars').innerHTML = stats.map((s,i) => `
+    <button class="m ${s.count?'':'none'}" data-m="${i}" aria-pressed="${S.month===i}" title="${V.cap(V.MONTHS[i])}: ${s.count ? V.docs(s.count)+', VAT '+V.fmt(s.vat) : 'brak dokumentów'}">
+      <span class="track"><span class="fill" style="--h:${Math.round(Math.abs(s.vat)/max*100)}%"></span></span>
+      <span class="ml">${V.MONTHS_SHORT[i]}</span>
+    </button>`).join('') + `<button class="m all" data-m="all" aria-pressed="${S.month==null}"><span class="track"><span>Cały<br>rok</span></span><span class="ml">${S.year}</span></button>`;
+  $('#yVal').textContent = S.year;
+  const sel = $('#bars [aria-pressed=true]'), bars = $('#bars'); if (sel && bars.scrollWidth > bars.clientWidth) bars.scrollLeft = sel.offsetLeft - bars.clientWidth/2 + sel.offsetWidth/2;
+  $('#yPrev').disabled = S.year <= 2025; $('#yNext').disabled = S.year >= 2026;
+}
+
+function chips(){
+  const c = [];
+  if (S.op!=='all') c.push(['op', V.OPS[S.kind].find(o=>o[0]===S.op)[1]]);
+  if (S.jpk!=='all') c.push(['jpk', 'JPK: '+V.JPK.find(o=>o[0]===S.jpk)[1]]);
+  S.series.forEach(s => c.push(['series:'+s, 'Seria '+s]));
+  $('#fCount').hidden = !c.length; $('#fCount').textContent = c.length;
+  $('#chips').innerHTML = c.map(([k,l]) => `<span class="chip">${V.esc(l)}<button data-rm="${k}" aria-label="Usuń filtr ${V.esc(l)}"><i data-lucide="x"></i></button></span>`).join('')
+    + (c.length ? `<button class="chip clear" data-clear>Wyczyść filtry</button>` : '');
+}
+
+function periodLabel(){ return S.month==null ? `Cały rok ${S.year}` : `${V.cap(V.MONTHS[S.month])} ${S.year}`; }
+
+function renderContent(){
+  const el = $('#content');
+  if (S.loading){
+    el.innerHTML = `<div class="sum"><div><div class="skel" style="width:180px;height:22px;margin-bottom:14px"></div><div class="skel" style="width:80%;height:28px"></div></div><div class="skel" style="height:10px"></div></div>
+    <div class="card">${Array.from({length:6},()=>`<div style="padding:18px 16px;border-bottom:1px solid var(--line)"><div class="skel" style="width:${50+Math.random()*40}%"></div></div>`).join('')}</div>`;
+    return;
+  }
+  if (S.demo==='error'){
+    el.innerHTML = `<div class="card" style="margin-top:28px"><div class="state err"><div class="ic"><i data-lucide="cloud-off"></i></div>
+      <h3>${V.ERROR_TITLE}</h3><p>${V.ERROR_TEXT}</p>
+      <div class="acts"><button class="btn primary" data-retry><i data-lucide="rotate-cw"></i>Spróbuj ponownie</button></div></div></div>`;
+    return;
+  }
+  const { rows, totals } = V.query({ kind:S.kind, year:S.year, month:S.month, ...filters(), q:S.q, sort:S.sort });
+  const list = S.demo==='empty' ? [] : rows;
+  const t = S.demo==='empty' ? V.sum([]) : totals;
+  const p = V.page(list, S.page, S.size); S.page = p.page;
+  const palette = ['var(--brand)','#5BB9A3','#B9DDD3','#7C8C88','#C9D3CF'];
+  const ratesHtml = t.byRate.length ? `
+      <div class="stack">${t.byRate.map((r,i)=>`<span style="flex:${Math.max(Math.abs(r.net),1)};background:${palette[i]}"></span>`).join('')}</div>
+      <div class="legend">${t.byRate.map((r,i)=>`<span><i style="background:${palette[i]}"></i>${r.rate} <b>${V.fmt(r.vat)}</b></span>`).join('')}</div>`
+    : `<div class="stack"></div><div class="legend"><span style="color:var(--faint)">Brak kwot w tym okresie</span></div>`;
+
+  const cols = S.cols.filter(c=>c.on);
+  const sortIcon = k => S.sort.key===k ? (S.sort.dir>0?'arrow-up':'arrow-down') : 'arrow-up-down';
+  const cell = (c,d) => {
+    if (c.key==='ksef') return `<td data-c="ksef">${d.ksef ? `<span class="ks ok" title="${d.ksef}"><i></i>Potwierdzono</span>` : `<span class="ks"><i></i>Brak potwierdzenia</span>`}</td>`;
+    if (c.key==='party') return `<td data-c="party" class="party">${V.esc(d.party)}</td>`;
+    if (c.key==='date') return `<td data-c="date">${d.date}</td>`;
+    return `<td data-c="${c.key}" class="mono">${V.esc(d[c.key])}</td>`;
+  };
+  const detail = d => `<tr class="detail"><td colspan="${cols.length+2}"><dl class="dg">
+      <div><dt>Rodzaj operacji</dt><dd>${d.opLabel}</dd></div>
+      <div><dt>Kod JPK V7</dt><dd>${d.jpk||'Bez kodu'}</dd></div>
+      <div><dt>Seria dokumentu</dt><dd>${d.series}</dd></div>
+      <div><dt>Identyfikator</dt><dd>${d.ident}</dd></div>
+      <div><dt>Numer KSeF</dt><dd>${d.ksef||'Brak potwierdzenia'}</dd></div>
+      <div class="lines"><div class="ln h"><span>Stawka</span><span>Netto</span><span>VAT</span><span>Brutto</span></div>
+      ${d.lines.map(l=>`<div class="ln"><span>${l.rate}</span><span>${V.fmtNum(l.net)}</span><span>${V.fmtNum(l.vat)}</span><span>${V.fmtNum(l.net+l.vat)}</span></div>`).join('')}</div>
+    </dl></td></tr>`;
+
+  const tableHtml = !list.length ? emptyState(rows.length) : `
+    <table>
+      <thead><tr>${cols.map(c=>`<th data-k="${c.key}" ${S.sort.key===c.key?`aria-sort="${S.sort.dir>0?'ascending':'descending'}"`:''}><button data-sort="${c.key}">${c.label}<i data-lucide="${sortIcon(c.key)}"></i></button></th>`).join('')}
+        <th class="num" ${S.sort.key==='gross'?`aria-sort="${S.sort.dir>0?'ascending':'descending'}"`:''}><button data-sort="gross">Brutto<i data-lucide="${sortIcon('gross')}"></i></button></th><th style="width:48px"><span class="sr" style="position:absolute;clip:rect(0 0 0 0)">Szczegóły</span></th></tr></thead>
+      <tbody>${p.items.map(d => `<tr class="row" data-id="${d.id}" aria-expanded="${S.open===d.id}" tabindex="0">${cols.map(c=>cell(c,d)).join('')}<td class="num">${V.fmt(d.gross)}</td><td class="ex"><span class="chev"><i data-lucide="chevron-down"></i></span></td></tr>${S.open===d.id?detail(d):''}`).join('')}</tbody>
+    </table>
+    <div class="foot"><span>${p.from}–${p.to} z ${V.docs(p.total)}</span>
+      <div class="pager"><div class="pg"><button data-pg="-1" ${p.page<=1?'disabled':''} aria-label="Poprzednia strona"><i data-lucide="chevron-left"></i></button><span>${p.page} / ${p.pages}</span><button data-pg="1" ${p.page>=p.pages?'disabled':''} aria-label="Następna strona"><i data-lucide="chevron-right"></i></button></div>
+      <select id="size" aria-label="Wierszy na stronie">${[10,25,50].map(n=>`<option value="${n}" ${n===S.size?'selected':''}>${n} na stronie</option>`).join('')}</select></div></div>`;
+
+  el.innerHTML = `
+    <section class="sum">
+      <div><h2>${periodLabel()}</h2>
+        <dl class="kpi"><div><dt>Netto</dt><dd>${V.fmt(t.net)}</dd></div><div class="vat"><dt>VAT</dt><dd>${V.fmt(t.vat)}</dd></div><div><dt>Brutto</dt><dd>${V.fmt(t.gross)}</dd></div></dl></div>
+      <div class="rates"><div class="rl"><span>Kwoty według stawek VAT</span><span>${V.docs(t.count)}</span></div>${ratesHtml}</div>
+    </section>
+    <div class="card">${tableHtml}</div>`;
+}
+
+function emptyState(hadRows){
+  const filtered = S.op!=='all'||S.jpk!=='all'||S.series.length||S.q;
+  return `<div class="state"><div class="ic"><i data-lucide="${filtered?'search-x':'calendar-x-2'}"></i></div>
+    <h3>${filtered ? 'Żaden dokument nie pasuje do filtrów' : `Brak dokumentów: ${periodLabel().toLowerCase()}`}</h3>
+    <p>${filtered ? 'Zmień wyszukiwaną frazę lub wyczyść filtry, aby zobaczyć wszystkie dokumenty z okresu.' : 'W tym okresie nie zarejestrowano dokumentów. Wybierz inny miesiąc na osi powyżej.'}</p>
+    <div class="acts">${filtered?`<button class="btn" data-clear>Wyczyść filtry</button>`:''}<button class="btn" data-goto="9">Przejdź do października 2026</button></div></div>`;
+}
+
+function render(){ renderBars(); chips(); renderContent(); V.icons(); }
+
+/* drawer: filters or columns */
+function openDrawer(mode){
+  $('#drawerTitle').textContent = mode==='cols' ? 'Kolumny tabeli' : 'Filtry';
+  if (mode==='cols'){
+    $('#drawerBody').innerHTML = `<p style="margin:0;color:var(--muted);font-size:14px">Pokaż, ukryj i ustaw kolejność kolumn.</p><div class="cols">${S.cols.map((c,i)=>`
+      <div class="c"><label><input type="checkbox" data-col="${i}" ${c.on?'checked':''}>${c.label}</label>
+      <button data-mv="${i}:-1" ${i===0?'disabled':''} aria-label="Przesuń wyżej"><i data-lucide="arrow-up"></i></button>
+      <button data-mv="${i}:1" ${i===S.cols.length-1?'disabled':''} aria-label="Przesuń niżej"><i data-lucide="arrow-down"></i></button></div>`).join('')}</div>`;
+    $('#drawerFoot').innerHTML = `<button class="btn" data-colreset>Przywróć domyślne</button><button class="btn primary" data-close>Gotowe</button>`;
+  } else {
+    const opt = (arr,val,all) => `<option value="all">${all}</option>` + arr.map(([v,l])=>`<option value="${v}" ${v===val?'selected':''}>${l}</option>`).join('');
+    $('#drawerBody').innerHTML = `
+      <div class="row2"><label class="field">Rok<select id="fYear">${[2025,2026].map(y=>`<option ${y===S.year?'selected':''}>${y}</option>`).join('')}</select></label>
+      <label class="field">Miesiąc<select id="fMonth"><option value="all">Cały rok</option>${V.MONTHS.map((m,i)=>`<option value="${i}" ${i===S.month?'selected':''}>${m}</option>`).join('')}</select></label></div>
+      <label class="field">Rodzaj operacji<select id="fOp">${opt(V.OPS[S.kind],S.op,'Wszystkie')}</select></label>
+      <label class="field">Kod JPK V7<select id="fJpk">${opt(V.JPK,S.jpk,'Wszystkie')}</select></label>
+      <fieldset><legend>Serie dokumentów</legend><div class="toggles">${V.SERIES[S.kind].map(s=>`<label><input type="checkbox" data-series="${s}" ${S.series.includes(s)?'checked':''}>${V.SERIES_LABEL[s]}</label>`).join('')}</div></fieldset>`;
+    const n = V.query({kind:S.kind,year:S.year,month:S.month,...filters(),q:S.q}).rows.length;
+    $('#drawerFoot').innerHTML = `<button class="btn" data-clear>Wyczyść filtry</button><button class="btn primary" data-close>Pokaż ${V.docs(n)}</button>`;
+  }
+  $('#drawer').dataset.mode = mode;
+  $('#drawer').classList.add('on'); $('#scrim').classList.add('on'); $('#drawer').setAttribute('aria-hidden','false');
+  V.icons();
+}
+function closeDrawer(){ $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); $('#drawer').setAttribute('aria-hidden','true'); }
+function refreshDrawer(){ if ($('#drawer').classList.contains('on')) openDrawer($('#drawer').dataset.mode); }
+
+function clearFilters(){ S.op='all'; S.jpk='all'; S.series=[]; S.q=''; $('#q').value=''; S.page=1; }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button,[data-id],[data-clear]'); if (!t) return;
+  if (t.dataset.kind){ S.kind=t.dataset.kind; S.op='all'; S.series=[]; S.page=1; S.open=null; document.querySelectorAll('[data-kind]').forEach(b=>b.setAttribute('aria-selected', String(b===t))); render(); }
+  else if (t.dataset.m){ S.month = t.dataset.m==='all'?null:+t.dataset.m; S.page=1; S.open=null; render(); }
+  else if (t.id==='yPrev'||t.id==='yNext'){ S.year += t.id==='yNext'?1:-1; S.page=1; render(); }
+  else if (t.dataset.sort){ const k=t.dataset.sort; S.sort = {key:k, dir: S.sort.key===k ? -S.sort.dir : 1}; render(); }
+  else if (t.dataset.pg){ S.page += +t.dataset.pg; S.open=null; render(); }
+  else if (t.dataset.id){ S.open = S.open===t.dataset.id ? null : t.dataset.id; renderContent(); V.icons(); }
+  else if ('clear' in t.dataset){ clearFilters(); render(); refreshDrawer(); }
+  else if (t.dataset.rm){ const k=t.dataset.rm; if(k==='op')S.op='all'; else if(k==='jpk')S.jpk='all'; else S.series=S.series.filter(s=>s!==k.split(':')[1]); render(); }
+  else if (t.dataset.goto){ clearFilters(); S.year=2026; S.month=+t.dataset.goto; render(); }
+  else if ('retry' in t.dataset){ S.demo='data'; demo.set('data'); S.loading=true; render(); setTimeout(()=>{S.loading=false; render();},900); }
+  else if (t.dataset.act){ V.closeMenus(); V.toast(t.dataset.act); }
+  else if (t.id==='filtersBtn') openDrawer('filters');
+  else if (t.id==='colsBtn'){ V.closeMenus(); openDrawer('cols'); }
+  else if (t.id==='drawerClose' || 'close' in t.dataset) closeDrawer();
+  else if (t.dataset.mv){ const [i,d]=t.dataset.mv.split(':').map(Number); const c=S.cols.splice(i,1)[0]; S.cols.splice(i+d,0,c); render(); refreshDrawer(); }
+  else if ('colreset' in t.dataset){ S.cols = V.COLUMNS.map(c=>({...c,on:true})); render(); refreshDrawer(); }
+});
+$('#scrim').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeDrawer(); if ((e.key==='Enter'||e.key===' ') && e.target.matches('tr.row')){ e.preventDefault(); e.target.click(); } });
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id==='size'){ S.size=+t.value; S.page=1; }
+  else if (t.id==='fYear') S.year=+t.value;
+  else if (t.id==='fMonth') S.month = t.value==='all'?null:+t.value;
+  else if (t.id==='fOp') S.op=t.value;
+  else if (t.id==='fJpk') S.jpk=t.value;
+  else if (t.dataset.series){ S.series = t.checked ? [...S.series, t.dataset.series] : S.series.filter(s=>s!==t.dataset.series); }
+  else if (t.dataset.col!=null){ S.cols[+t.dataset.col].on = t.checked; if(!S.cols.some(c=>c.on)) { S.cols[+t.dataset.col].on = true; t.checked = true; } }
+  else return;
+  S.page=1; render(); if (t.closest('.drawer') && !t.dataset.col) refreshDrawer();
+});
+$('#q').addEventListener('input', e => { S.q=e.target.value; S.page=1; renderContent(); V.icons(); });
+
+V.bindMenus();
+const demo = V.demoBar(s => { S.demo=s; render(); });
+render();
+</script>
+</body>
+</html>

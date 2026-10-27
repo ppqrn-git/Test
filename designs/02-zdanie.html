@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rejestry i VAT — Zdanie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<style>
+:root{
+  --paper:#FFFFFF;--ink:#1A2238;--muted:#646C80;--faint:#9AA1B2;--line:#E7E9EF;--wash:#F5F6F9;
+  --hi:#FFE38A;--hi-soft:#FFF6D1;--link:#2B3FA0;--ok:#1F7A55;--warn:#946200;--err:#B3261E;--err-soft:#FCEDEC;
+  --toast-bg:#1A2238;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{overflow-x:clip}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font:400 15px/1.55 "Hanken Grotesk",system-ui,sans-serif;font-feature-settings:"tnum" 1}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px;border-radius:4px}
+svg.lucide{width:18px;height:18px;flex:none}
+.page{max-width:980px;margin:0 auto;padding:40px 28px 110px}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}
+.org{color:var(--muted);margin:0}
+.org b{color:var(--ink);font-weight:600}
+.flag{position:relative}
+.flag>button{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px 5px 8px;font-size:13px;color:var(--muted)}
+.flag>button .dot{width:8px;height:8px;border-radius:50%;background:#E3A21A;box-shadow:0 0 0 3px var(--hi-soft)}
+.flag>button b{color:var(--warn);font-weight:600}
+.flag .demo{border-left:1px solid var(--line);padding-left:8px;font-weight:600;color:var(--ink)}
+.pop{position:absolute;right:0;top:calc(100% + 8px);z-index:20;width:min(340px,calc(100vw - 32px));background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px rgba(26,34,56,.14);padding:16px;font-size:14px}
+.pop p{margin:0 0 8px;color:var(--muted)} .pop p:last-child{margin:0}
+.pop strong{display:block;margin-bottom:4px}
+
+h1{font:600 15px/1.2 "Hanken Grotesk",sans-serif;margin:40px 0 10px;color:var(--muted)}
+
+/* the sentence — the hero */
+.sentence{font-family:"Newsreader",Georgia,serif;font-weight:400;font-size:clamp(28px,4.6vw,46px);line-height:1.32;letter-spacing:-.01em;margin:0;max-width:22em;text-wrap:pretty}
+.w{position:relative;display:inline}
+.w>button{border:0;background:linear-gradient(transparent 62%,var(--hi) 62%,var(--hi) 92%,transparent 92%);padding:0 .08em;font:inherit;color:inherit;border-radius:2px;transition:background-size .2s}
+.w>button:hover{background:linear-gradient(transparent 10%,var(--hi) 10%,var(--hi) 92%,transparent 92%)}
+.w>button::after{content:"";display:inline-block;width:.32em;height:.32em;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-.18em) rotate(45deg);margin-left:.18em;opacity:.55}
+.w>button[aria-expanded=true]{background:var(--hi)}
+.opts{position:absolute;left:0;top:calc(100% + 6px);z-index:20;min-width:220px;max-height:320px;overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px rgba(26,34,56,.14);padding:6px;font:500 15px/1.3 "Hanken Grotesk",sans-serif;letter-spacing:0}
+.opts button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:9px 10px;border-radius:9px;white-space:nowrap}
+.opts button:hover{background:var(--wash)}
+.opts button[aria-checked=true]{font-weight:700}
+.opts button[aria-checked=true]::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink)}
+.opts button[aria-checked=false]::before{content:"";width:6px}
+.opts .cb{width:16px;height:16px;border:1.5px solid var(--faint);border-radius:4px;display:grid;place-items:center}
+.opts .cb.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.opts .cb svg{width:12px;height:12px}
+.opts.multi button::before{display:none}
+.opts hr{border:0;border-top:1px solid var(--line);margin:6px}
+
+/* tools */
+.tools{display:flex;align-items:center;gap:10px;margin:34px 0 0;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.search{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;color:var(--faint)}
+.search input{flex:1;min-width:0;border:0;outline:0;background:none;height:38px;color:var(--ink)}
+.search:focus-within{color:var(--ink)}
+.tb{display:inline-flex;align-items:center;gap:6px;border:0;background:none;height:38px;padding:0 10px;border-radius:10px;color:var(--muted);font-weight:500;font-size:14px}
+.tb:hover{background:var(--wash);color:var(--ink)}
+.tb.strong{background:var(--ink);color:#fff}
+.tb.strong:hover{background:#2A3454;color:#fff}
+.mw{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 6px);z-index:20;min-width:240px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px rgba(26,34,56,.14);padding:6px}
+.menu button,.menu label{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:9px 10px;border-radius:9px;font-size:14px;cursor:pointer}
+.menu button:hover,.menu label:hover{background:var(--wash)}
+.menu .mh{font-size:12px;color:var(--faint);padding:8px 10px 4px}
+.menu input{accent-color:var(--ink)}
+.menu .mv{margin-left:auto;display:flex}
+.menu .mv span{padding:2px;border-radius:5px;color:var(--faint)}
+.menu .mv span:hover{color:var(--ink);background:var(--line)}
+
+/* answer */
+.answer{margin:30px 0 8px;display:flex;justify-content:space-between;gap:20px;align-items:flex-end;flex-wrap:wrap}
+.answer .big{font-family:"Newsreader",serif;font-size:clamp(22px,3vw,28px);line-height:1.25;margin:0}
+.answer .big b{font-weight:600}
+.facts{display:flex;gap:22px;flex-wrap:wrap;margin:0;font-size:14px;color:var(--muted)}
+.facts dd{margin:0;color:var(--ink);font-weight:600;font-size:16px}
+.rates{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0;font-size:13px;color:var(--muted)}
+.rates span{background:var(--wash);border-radius:999px;padding:3px 10px}
+.rates b{color:var(--ink);font-weight:600}
+
+/* list */
+.list{margin-top:18px}
+.day{display:flex;justify-content:space-between;align-items:baseline;padding:22px 0 6px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--ink)}
+.day b{font-family:"Newsreader",serif;font-size:19px;font-weight:500;color:var(--ink)}
+.item{border-bottom:1px solid var(--line)}
+.item>button{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(150px,1.4fr) 150px minmax(90px,.8fr) 130px 20px;gap:16px;align-items:center;width:100%;border:0;background:none;text-align:left;padding:14px 4px;font-size:14px}
+.item>button:hover{background:var(--wash)}
+.item .p{font-weight:600}
+.item .n{color:var(--muted)}
+.item .id{color:var(--faint);font-size:13px}
+.item .g{text-align:right;font-weight:600}
+.item .g.neg{color:var(--err)}
+.item .chev{color:var(--faint);transition:transform .2s}
+.item[data-open] .chev{transform:rotate(90deg)}
+.ks{font-size:13px;display:inline-flex;align-items:center;gap:6px;color:var(--warn)}
+.ks::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.ks.ok{color:var(--ok)}
+.more{padding:4px 4px 18px;display:grid;grid-template-columns:1fr 1.2fr;gap:24px}
+.more dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px}
+.more dt{color:var(--muted)}
+.more dd{margin:0;word-break:break-all}
+.more table{width:100%;border-collapse:collapse;font-size:14px}
+.more th{font-weight:500;color:var(--muted);text-align:right;padding:4px 0;border-bottom:1px solid var(--line)}
+.more td{text-align:right;padding:6px 0}
+.more th:first-child,.more td:first-child{text-align:left}
+.heads{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(150px,1.4fr) 150px minmax(90px,.8fr) 130px 20px;gap:16px;padding:0 4px 8px;font-size:12px;color:var(--faint);margin-top:18px}
+.heads .r{text-align:right}
+
+.pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:22px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.pager .nav{display:flex;align-items:center;gap:4px}
+.pager .nav button{border:1px solid var(--line);background:var(--paper);width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
+.pager .nav button:disabled{opacity:.35;cursor:default}
+.pager .nav span{padding:0 10px;color:var(--ink);font-weight:600}
+.pager select{border:1px solid var(--line);background:var(--paper);border-radius:10px;height:36px;padding:0 8px}
+
+.note{margin:48px 0 0;padding:40px 0;border-top:1px solid var(--line)}
+.note h2{font-family:"Newsreader",serif;font-weight:500;font-size:28px;line-height:1.25;margin:0 0 10px;max-width:20em}
+.note p{color:var(--muted);margin:0 0 18px;max-width:34em}
+.note .acts{display:flex;gap:10px;flex-wrap:wrap}
+.note.err h2{color:var(--err)}
+.btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--paper);font-weight:600}
+.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.skel{height:16px;border-radius:6px;background:linear-gradient(90deg,#EEF0F4,#F7F8FA,#EEF0F4);background-size:200% 100%;animation:sk 1.2s infinite;margin:18px 0}
+@keyframes sk{to{background-position:-200% 0}}
+
+@media (max-width:900px){
+  .heads{display:none}
+  .item>button{grid-template-columns:1fr auto;gap:2px 12px;padding:14px 2px}
+  .item .p{grid-column:1}
+  .item .g{grid-column:2;grid-row:1}
+  .item .n{grid-column:1;font-size:13px}
+  .item .ks{grid-column:1}
+  .item .id{grid-column:2;grid-row:2;text-align:right}
+  .item .chev{display:none}
+  .more{grid-template-columns:1fr;gap:14px}
+}
+@media (max-width:560px){
+  .page{padding:24px 16px 110px}
+  h1{margin-top:28px}
+  .tools .tb .tx{display:none}
+  .search{flex-basis:100%}
+  .tools{gap:4px}
+  .tools .spacer{flex:1}
+  .facts{gap:14px}
+  .pager{justify-content:center}
+  .opts{position:fixed;left:12px!important;right:12px;top:auto;bottom:12px;max-height:60vh;font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="top">
+    <p class="org"><b>Onsaldo Preview Sp. z o.o.</b></p>
+    <div class="flag">
+      <button data-menu-toggle="flagPop" aria-expanded="false"><span class="dot"></span><b>Wymaga potwierdzenia</b><span class="demo">DEMO</span></button>
+      <div class="pop js-menu" id="flagPop" hidden>
+        <strong>Kontekst VAT wymaga potwierdzenia</strong>
+        <p>Poniżej wyłącznie dane demonstracyjne, nie ewidencja organizacji.</p>
+        <p>Sprzedaż i zakupy w wybranym okresie — podgląd danych demonstracyjnych.</p>
+      </div>
+    </div>
+  </div>
+
+  <h1>Rejestry i VAT</h1>
+  <p class="sentence" id="sentence"></p>
+
+  <div class="tools">
+    <label class="search"><i data-lucide="search"></i><input id="q" type="search" placeholder="Szukaj w wynikach: kontrahent, numer, KSeF" aria-label="Szukaj"></label>
+    <span class="spacer"></span>
+    <div class="mw">
+      <button class="tb" data-menu-toggle="viewMenu" aria-expanded="false"><i data-lucide="columns-3"></i><span class="tx">Widok</span></button>
+      <div class="menu js-menu" id="viewMenu" hidden></div>
+    </div>
+    <button class="tb" data-act="Etykiety: zaznacz dokumenty, aby dodać etykietę"><i data-lucide="tag"></i><span class="tx">Etykiety</span></button>
+    <button class="tb" data-act="Otwarto podgląd wydruku"><i data-lucide="printer"></i><span class="tx">Drukuj</span></button>
+    <div class="mw">
+      <button class="tb strong" data-menu-toggle="expMenu" aria-expanded="false"><i data-lucide="download"></i><span class="tx">Eksportuj</span></button>
+      <div class="menu js-menu" id="expMenu" hidden>
+        <button data-act="Pobieranie CSV…"><i data-lucide="file-text"></i>Plik CSV</button>
+        <button data-act="Pobieranie XLSX…"><i data-lucide="sheet"></i>Arkusz XLSX</button>
+        <button data-act="Pobieranie PDF…"><i data-lucide="file"></i>Dokument PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="out"></div>
+</main>
+
+<script>
+const V = VAT, $ = s => document.querySelector(s);
+const MONTH_GEN = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+const WEEK = ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
+const S = { kind:'sales', year:2026, month:9, op:'all', jpk:'all', series:[], q:'', sort:{key:'date',dir:1}, page:1, size:10, open:null, demo:'data', loading:false,
+  cols:{ number:true, ksef:true, ident:true } };
+
+const SORTS = [['date',1,'daty, od najstarszych'],['date',-1,'daty, od najnowszych'],['party',1,'kontrahenta'],['number',1,'numeru dokumentu'],['ksef',1,'statusu KSeF'],['ident',1,'identyfikatora'],['gross',-1,'kwoty brutto']];
+
+function word(id, label, opts, multi){
+  return `<span class="w"><button data-menu-toggle="w-${id}" aria-expanded="false" aria-haspopup="listbox">${label}</button>`+
+    `<span class="opts js-menu ${multi?'multi':''}" id="w-${id}" role="listbox" hidden>${opts}</span></span>`;
+}
+const opt = (field, val, label, cur) => `<button role="option" data-set="${field}" data-val="${val}" aria-checked="${String(val)===String(cur)}">${label}</button>`;
+
+function renderSentence(){
+  const opName = S.op==='all' ? 'wszystkie rodzaje operacji' : V.OPS[S.kind].find(o=>o[0]===S.op)[1].toLowerCase();
+  const jpkName = S.jpk==='all' ? 'dowolny' : V.JPK.find(o=>o[0]===S.jpk)[1].replace('Bez kodu','bez kodu');
+  const serName = !S.series.length ? 'wszystkie' : S.series.join(', ');
+  const sortName = SORTS.find(s=>s[0]===S.sort.key && s[1]===S.sort.dir)?.[2] || 'daty';
+  $('#sentence').innerHTML =
+    `Pokaż ${word('kind', S.kind==='sales'?'sprzedaż':'zakupy', opt('kind','sales','Rejestr VAT sprzedaży',S.kind)+opt('kind','purchases','Rejestr VAT zakupów',S.kind))}`+
+    ` z ${word('month', S.month==null?'całego roku':MONTH_GEN[S.month], opt('month','all','cały rok',S.month??'all')+'<hr>'+V.MONTHS.map((m,i)=>opt('month',i,m,S.month)).join(''))}`+
+    ` ${word('year', S.year, [2025,2026].map(y=>opt('year',y,y,S.year)).join(''))},`+
+    ` ${word('op', opName, opt('op','all','Wszystkie rodzaje operacji',S.op)+V.OPS[S.kind].map(([v,l])=>opt('op',v,l,S.op)).join(''))},`+
+    ` kod JPK V7 ${word('jpk', jpkName, opt('jpk','all','Dowolny',S.jpk)+V.JPK.map(([v,l])=>opt('jpk',v,l,S.jpk)).join(''))},`+
+    ` serie dokumentów: ${word('series', serName, V.SERIES[S.kind].map(s=>`<button data-series="${s}"><span class="cb ${S.series.includes(s)?'on':''}">${S.series.includes(s)?'<i data-lucide="check"></i>':''}</span>${V.SERIES_LABEL[s]}</button>`).join('')+'<hr>'+`<button data-series="__all">Wszystkie serie</button>`, true)}.`+
+    ` Sortuj według ${word('sort', sortName, SORTS.map((s,i)=>`<button role="option" data-sorti="${i}" aria-checked="${s[0]===S.sort.key&&s[1]===S.sort.dir}">${V.cap(s[2])}</button>`).join(''))}.`;
+}
+
+function renderView(){
+  const names = {number:'Numer dokumentu', ksef:'Numer KSeF', ident:'Identyfikator'};
+  $('#viewMenu').innerHTML = `<div class="mh">Widoczne kolumny</div>
+    <label><input type="checkbox" checked disabled>Kontrahent</label>
+    ${Object.keys(S.cols).map(k=>`<label><input type="checkbox" data-col="${k}" ${S.cols[k]?'checked':''}>${names[k]}</label>`).join('')}
+    <label><input type="checkbox" checked disabled>Data i kwota brutto</label>
+    <div class="mh">Kolejność ustawisz, sortując w zdaniu powyżej.</div>`;
+}
+
+function filtered(){ return S.op!=='all'||S.jpk!=='all'||S.series.length||S.q; }
+function periodText(){ return S.month==null ? `w ${S.year} roku` : `w ${V.MONTHS_LOC[S.month]} ${S.year}`; }
+
+function renderOut(){
+  const out = $('#out');
+  if (S.loading){ out.innerHTML = '<div style="margin-top:30px">'+Array.from({length:7},(_,i)=>`<div class="skel" style="width:${i?60+Math.random()*35:40}%"></div>`).join('')+'</div>'; return; }
+  if (S.demo==='error'){
+    out.innerHTML = `<section class="note err"><h2>${V.ERROR_TITLE}.</h2><p>${V.ERROR_TEXT}</p>
+      <div class="acts"><button class="btn dark" data-retry><i data-lucide="rotate-cw"></i>Spróbuj ponownie</button></div></section>`;
+    return;
+  }
+  const { rows, totals } = V.query({ kind:S.kind, year:S.year, month:S.month, op:S.op, jpk:S.jpk, series:S.series, q:S.q, sort:S.sort });
+  const list = S.demo==='empty' ? [] : rows;
+  if (!list.length){
+    out.innerHTML = `<section class="note"><h2>${filtered() ? 'Żaden dokument nie pasuje do tego zdania.' : `Brak dokumentów ${periodText()}.`}</h2>
+      <p>${filtered() ? 'Zmień podkreślone słowa albo wyczyść filtry, aby zobaczyć cały okres.' : 'Zmień miesiąc w zdaniu powyżej — dokumenty z innych okresów są dostępne.'}</p>
+      <div class="acts">${filtered()?'<button class="btn" data-clear>Wyczyść filtry</button>':''}<button class="btn dark" data-goto>Pokaż październik 2026</button></div></section>`;
+    return;
+  }
+  const t = totals;
+  const p = V.page(list, S.page, S.size); S.page = p.page;
+  const groups = S.sort.key==='date';
+  let html = `<section class="answer"><div>
+      <p class="big"><b>${V.docs(t.count)}</b> ${periodText()} na <b>${V.fmt(t.gross)}</b> brutto</p>
+      <div class="rates" aria-label="Kwoty według stawek VAT">${t.byRate.map(r=>`<span>${r.rate}: VAT <b>${V.fmt(r.vat)}</b></span>`).join('')}</div></div>
+    <dl class="facts"><div><dt>Netto</dt><dd>${V.fmt(t.net)}</dd></div><div><dt>VAT</dt><dd>${V.fmt(t.vat)}</dd></div><div><dt>Brutto</dt><dd>${V.fmt(t.gross)}</dd></div></dl></section>`;
+  if (!groups) html += heads();
+  html += '<div class="list">';
+  let lastDay = null;
+  p.items.forEach(d => {
+    if (groups && d.date !== lastDay){
+      lastDay = d.date;
+      const dt = new Date(d.date+'T12:00:00');
+      const daySum = list.filter(x=>x.date===d.date).reduce((a,x)=>a+x.gross,0);
+      html += `<div class="day"><b>${dt.getDate()} ${MONTH_GEN[dt.getMonth()]}, ${WEEK[dt.getDay()]}</b><span>${V.fmt(daySum)}</span></div>`;
+    }
+    html += item(d);
+  });
+  html += '</div>';
+  html += `<div class="pager"><span>${p.from}–${p.to} z ${V.docs(p.total)}</span><div class="nav">
+      <button data-pg="-1" ${p.page<=1?'disabled':''} aria-label="Poprzednia strona"><i data-lucide="arrow-left"></i></button><span>${p.page} z ${p.pages}</span>
+      <button data-pg="1" ${p.page>=p.pages?'disabled':''} aria-label="Następna strona"><i data-lucide="arrow-right"></i></button></div>
+      <select id="size" aria-label="Wierszy na stronie">${[10,25,50].map(n=>`<option value="${n}" ${n===S.size?'selected':''}>${n} na stronie</option>`).join('')}</select></div>`;
+  out.innerHTML = html;
+}
+function heads(){
+  return `<div class="heads"><span>Kontrahent</span><span>${S.cols.number?'Numer dokumentu':''}</span><span>${S.cols.ksef?'Numer KSeF':''}</span><span>${S.cols.ident?'Identyfikator':''}</span><span class="r">Brutto</span><span></span></div>`;
+}
+function item(d){
+  const open = S.open===d.id;
+  return `<div class="item" ${open?'data-open':''}><button data-id="${d.id}" aria-expanded="${open}">
+    <span class="p">${V.esc(d.party)}</span>
+    <span class="n">${S.cols.number?V.esc(d.number):''}</span>
+    <span>${S.cols.ksef?(d.ksef?'<span class="ks ok">Potwierdzono w KSeF</span>':'<span class="ks">Brak potwierdzenia</span>'):''}</span>
+    <span class="id">${S.cols.ident?d.ident:''}</span>
+    <span class="g ${d.gross<0?'neg':''}">${V.fmt(d.gross)}</span>
+    <i data-lucide="chevron-right" class="chev"></i></button>
+    ${open?`<div class="more"><dl>
+      <dt>Data</dt><dd>${d.date}</dd><dt>Numer dokumentu</dt><dd>${d.number}</dd><dt>Numer KSeF</dt><dd>${d.ksef||'Brak potwierdzenia'}</dd>
+      <dt>Identyfikator</dt><dd>${d.ident}</dd><dt>Rodzaj operacji</dt><dd>${d.opLabel}</dd><dt>Kod JPK V7</dt><dd>${d.jpk||'Bez kodu'}</dd><dt>Seria</dt><dd>${d.series}</dd></dl>
+      <table><thead><tr><th>Stawka</th><th>Netto</th><th>VAT</th><th>Brutto</th></tr></thead><tbody>
+      ${d.lines.map(l=>`<tr><td>${l.rate}</td><td>${V.fmtNum(l.net)}</td><td>${V.fmtNum(l.vat)}</td><td>${V.fmtNum(l.net+l.vat)}</td></tr>`).join('')}</tbody></table></div>`:''}
+  </div>`;
+}
+
+function render(){ renderSentence(); renderView(); renderOut(); V.icons(); }
+function reset(){ S.page=1; S.open=null; }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.set){
+    const f=t.dataset.set, v=t.dataset.val;
+    if (f==='kind'){ S.kind=v; S.op='all'; S.series=[]; }
+    else if (f==='month') S.month = v==='all'?null:+v;
+    else if (f==='year') S.year=+v;
+    else S[f]=v;
+    reset(); V.closeMenus(); render();
+  } else if (t.dataset.series){
+    const s=t.dataset.series;
+    S.series = s==='__all' ? [] : S.series.includes(s) ? S.series.filter(x=>x!==s) : [...S.series, s];
+    reset(); render();
+    document.getElementById('w-series').hidden = false; // keep multi-select open
+  } else if (t.dataset.sorti){ const s=SORTS[+t.dataset.sorti]; S.sort={key:s[0],dir:s[1]}; reset(); V.closeMenus(); render(); }
+  else if (t.dataset.id){ S.open = S.open===t.dataset.id?null:t.dataset.id; renderOut(); V.icons(); }
+  else if (t.dataset.pg){ S.page += +t.dataset.pg; S.open=null; renderOut(); V.icons(); window.scrollTo({top:$('.tools').offsetTop-8,behavior:'smooth'}); }
+  else if ('clear' in t.dataset){ S.op='all'; S.jpk='all'; S.series=[]; S.q=''; $('#q').value=''; reset(); render(); }
+  else if ('goto' in t.dataset){ S.op='all'; S.jpk='all'; S.series=[]; S.q=''; $('#q').value=''; S.year=2026; S.month=9; reset(); render(); }
+  else if ('retry' in t.dataset){ demo.set('data'); S.demo='data'; S.loading=true; render(); setTimeout(()=>{S.loading=false; render();},900); }
+  else if (t.dataset.act){ V.closeMenus(); V.toast(t.dataset.act); }
+});
+document.addEventListener('change', e => {
+  if (e.target.id==='size'){ S.size=+e.target.value; reset(); renderOut(); V.icons(); }
+  if (e.target.dataset.col){ S.cols[e.target.dataset.col]=e.target.checked; renderOut(); V.icons(); }
+});
+$('#q').addEventListener('input', e => { S.q=e.target.value; reset(); renderOut(); V.icons(); });
+
+V.bindMenus();
+const demo = V.demoBar(s => { S.demo=s; render(); });
+render();
+</script>
+</body>
+</html>

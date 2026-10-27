@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obszary księgowe — Tablica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/base.css">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<script src="shared/shell.js"></script>
+<script src="shared/home.js"></script>
+<style>
+.strip{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:16px;background:var(--navy-grad);color:#fff;box-shadow:0 16px 32px -20px rgba(21,39,77,.75);flex-wrap:wrap}
+.strip .ic{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.12);display:grid;place-items:center;flex:none}
+.strip .tx{flex:1;min-width:220px}
+.strip b{font-size:16px}
+.strip p{margin:0;color:var(--navy-muted);font-size:13px}
+.strip .nt{display:flex;gap:6px;align-items:center;color:#FFD99A;font-size:12.5px;border-left:1px solid var(--navy-line);padding-left:14px}
+.strip .nt svg{width:15px;height:15px}
+
+.filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.filters .lbl{color:var(--muted);font-size:13px;margin-right:4px}
+.fb{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-weight:600;font-size:13.5px;color:var(--muted)}
+.fb:hover{color:var(--ink)}
+.fb[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.fb .c{font-size:11.5px;background:var(--hover);color:var(--muted);border-radius:999px;padding:0 7px;line-height:18px}
+.fb[aria-pressed=true] .c{background:rgba(255,255,255,.18);color:#fff}
+.fb.go{border-style:dashed;text-decoration:none;color:var(--navy2)}
+
+.board{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:14px;align-items:start}
+.col{background:rgba(255,255,255,.45);border:1px solid rgba(23,27,36,.06);border-radius:18px;padding:10px;display:grid;gap:10px;min-height:200px;align-content:start}
+.col-h{display:flex;align-items:center;gap:8px;padding:4px 6px 2px;font-weight:600;font-size:13.5px}
+.col-h .n{margin-left:auto;font-size:12px;color:var(--muted);background:var(--panel);border-radius:999px;padding:0 8px;line-height:20px}
+.col-h i.sw{width:10px;height:10px;border-radius:3px;display:block}
+.tk{padding:14px;display:grid;gap:10px;transition:transform .2s,opacity .2s}
+.tk.hide{display:none}
+.tk .hd{display:flex;gap:10px;align-items:center}
+.tk .ai{width:34px;height:34px;border-radius:10px;background:var(--hover);display:grid;place-items:center;color:var(--muted);flex:none}
+.tk.vat .ai{background:var(--navy-grad);color:#fff}
+.tk b{font-weight:600;font-size:15px;display:block;line-height:1.2}
+.tk .tag{font-size:12px;color:var(--muted);text-decoration:none}
+.tk .tag:hover{color:var(--ink);text-decoration:underline}
+.tk .pr{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.tk .pr .b{flex:1;height:6px;border-radius:3px;background:var(--hover);overflow:hidden}
+.tk .pr .b i{display:block;height:100%;background:var(--ok)}
+.tk .nx{font-size:13px;color:var(--muted)}
+.tk .nx b{display:inline;font-size:13px;color:var(--ink)}
+.tk details summary{cursor:pointer;font-size:12.5px;color:var(--muted);list-style:none;display:flex;gap:4px;align-items:center}
+.tk details summary::-webkit-details-marker{display:none}
+.tk details summary svg{width:14px;height:14px;transition:transform .2s}
+.tk details[open] summary svg{transform:rotate(90deg)}
+.tk details .conds{margin-top:8px;font-size:13px}
+.tk .ft{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tk.vat{border-color:#B9C9EA}
+.emptycol{border:1.5px dashed #C9D1DE;border-radius:14px;padding:18px 14px;text-align:center;color:var(--muted);font-size:13px}
+.emptycol svg{display:block;margin:0 auto 6px;color:var(--faint)}
+.avail-p{margin:-6px 0 0;color:var(--muted);font-size:13px}
+
+@media (max-width:1100px){ .board{grid-template-columns:repeat(4,minmax(260px,82vw));overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;margin:0 -20px;padding-left:20px;padding-right:20px} .col{scroll-snap-align:start} }
+@media (max-width:520px){ .board{margin:0 -12px;padding-left:12px;padding-right:12px} .strip .nt{border:0;padding:0} }
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<main class="wrap page-enter">
+  <div class="pg-h"><nav class="crumbs"><span>Ewidencje</span></nav><h1>Obszary księgowe</h1><p>Mapa dostępnych obszarów księgowych dla aktywnej organizacji, ułożona według gotowości.</p></div>
+  <section class="strip"><span class="ic"><i data-lucide="calendar-days"></i></span><div class="tx"><b id="perT"></b><p id="perP"></p></div><span id="perC"></span><span class="nt"><i data-lucide="info"></i><span id="note"></span></span></section>
+  <div class="filters" id="filters" role="toolbar" aria-label="Obszary"></div>
+  <p class="avail-p" id="availP"></p>
+  <section class="board" id="board" aria-label="Dostępność obszarów"></section>
+</main>
+<script>
+const V = VAT, H = HOME, $ = s => document.querySelector(s);
+Shell.mount({ home:true });
+$('#perT').textContent = H.PERIOD.title; $('#perP').textContent = H.PERIOD.text; $('#perC').innerHTML = H.chip(H.PERIOD.status); $('#note').textContent = H.NOTE;
+$('#availP').textContent = 'Dostępność obszarów. ' + H.AVAIL_TEXT;
+
+let filter = 'all';
+function renderFilters(){
+  const cur = filter==='all' ? null : H.area(filter);
+  $('#filters').innerHTML = `<span class="lbl">Obszary:</span><button class="fb" data-f="all" aria-pressed="${filter==='all'}">Wszystkie<span class="c">${H.AVAIL.length}</span></button>` +
+    H.AREAS.map(a=>`<button class="fb" data-f="${a.id}" aria-pressed="${filter===a.id}"><i data-lucide="${a.icon}"></i>${a.name}<span class="c">${H.availOf(a.id).length}</span></button>`).join('') +
+    (cur ? `<a class="fb go" href="${cur.href}">Przejdź do: ${cur.name}<i data-lucide="arrow-right"></i></a>` : '');
+}
+const COLS = [
+  ['confirm','Wymaga potwierdzenia','#E3A21A'],
+  ['config','Wymaga konfiguracji','#5B7BC8'],
+  ['na','Niedostępne w demo','#A3AAB7'],
+  ['ok','Gotowe do pracy','#0C7C59']
+];
+function renderBoard(){
+  $('#board').innerHTML = COLS.map(([st, label, sw]) => {
+    const items = H.AVAIL.filter(i => i.status===st);
+    const vis = items.filter(i => filter==='all' || i.area===filter);
+    return `<div class="col"><div class="col-h"><i class="sw" style="background:${sw}"></i>${label}<span class="n">${vis.length}</span></div>
+      ${items.map(i => { const a = H.area(i.area), met = i.c.filter(c=>c[0]==='y').length;
+        return `<article class="card tk ${i.id==='vat'?'vat':''} ${vis.includes(i)?'':'hide'}">
+          <div class="hd"><span class="ai"><i data-lucide="${i.icon}"></i></span><div><b class="${i.id==='vat'?'vat-title':''}">${i.id==='vat' ? 'Rejestry i VAT' : i.name}</b><a class="tag" href="${a.href}">${i.id==='vat' ? 'Rejestr VAT' : a.name}</a></div></div>
+          <div class="pr"><span class="b"><i style="width:${met/i.c.length*100}%"></i></span>${met}/${i.c.length} warunków</div>
+          <div class="nx">Następny krok: <b>${i.next}</b></div>
+          ${i.id==='vat' ? `<div class="pr" style="color:var(--ink)"><i data-lucide="file-text" style="width:15px;height:15px;color:var(--muted)"></i>${V.docs(H.STATS.salesCount)} · VAT ${V.fmt(H.STATS.salesVat)} w paź</div>` : ''}
+          <details><summary><i data-lucide="chevron-right"></i>Szczegóły warunków</summary>${H.conds(i)}</details>
+          <div class="ft">${H.chip(i.status)}<a class="btn sm ${i.id==='vat'?'pri':''}" href="${i.href}">${i.id==='vat'?'Otwórz':i.cta}</a></div>
+        </article>`; }).join('')}
+      ${!vis.length ? `<div class="emptycol"><i data-lucide="${st==='ok'?'sparkles':'inbox'}"></i>${st==='ok' ? 'Tu trafią obszary, które spełnią wszystkie warunki.' : 'Brak obszarów w tej kolumnie.'}</div>` : ''}</div>`;
+  }).join('');
+}
+function render(){ renderFilters(); renderBoard(); V.icons(); }
+document.addEventListener('click', e => { const f = e.target.closest('[data-f]'); if (f){ filter = f.dataset.f; render(); } });
+render();
+V.bindMenus();
+</script>
+</body>
+</html>

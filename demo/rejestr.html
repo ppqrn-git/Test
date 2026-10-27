@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rejestry i VAT — Onsaldo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<script src="shared/shell.js"></script>
+<style>
+:root{
+  --bg:#ECEFF3;--panel:#fff;--ink:#1E2430;--muted:#5B6474;--faint:#949CAB;--line:#E2E6EC;--hover:#F4F6F9;
+  --blue:#0050D8;--blue-soft:#E8EFFD;--ok:#0C7C59;--ok-soft:#E3F4EC;--warn:#A35400;--warn-soft:#FFF1DE;--err:#C0262D;--err-soft:#FDECEC;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+html{overflow-x:clip}
+[hidden]{display:none!important}
+body{background:linear-gradient(155deg,#F4F6F9 0%,#E9EDF2 42%,#DBE1EA 100%);background-attachment:fixed;color:var(--ink);font:400 14px/1.5 "Onest",system-ui,sans-serif;font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+svg.lucide{width:17px;height:17px;flex:none}
+.app{max-width:1360px;margin:0 auto;padding:20px;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto 1fr;gap:12px;min-height:100%}
+
+.app>header{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.ttl{margin-right:auto}
+.ttl small{display:block;color:var(--muted);font-size:13px}
+.ttl h1{margin:2px 0 0;font-size:24px;letter-spacing:-.015em;line-height:1.2;view-transition-name:vat-title;width:fit-content}
+.tabs{position:relative;display:flex;background:var(--panel);border-radius:12px;padding:4px;border:1px solid var(--line);isolation:isolate}
+.tabs .thumb{position:absolute;z-index:-1;top:4px;bottom:4px;left:0;width:0;border-radius:9px;background:linear-gradient(120deg,#15274D,#1F3B76);box-shadow:0 6px 14px -8px rgba(21,39,77,.8);transition:transform .32s cubic-bezier(.3,.9,.3,1),width .32s cubic-bezier(.3,.9,.3,1)}
+.tabs button{position:relative;border:0;background:none;padding:7px 16px;border-radius:9px;font-weight:600;color:var(--muted);transition:color .25s}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected=true]{color:#fff}
+.md.swap-l .items,.md.swap-l .detail>*{animation:swapL .3s cubic-bezier(.2,.7,.2,1)}
+.md.swap-r .items,.md.swap-r .detail>*{animation:swapR .3s cubic-bezier(.2,.7,.2,1)}
+@keyframes swapL{from{opacity:.35;transform:translateX(-14px)}}
+@keyframes swapR{from{opacity:.35;transform:translateX(14px)}}
+.st{position:relative;display:flex;gap:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:8px;padding:5px 10px;font-size:12.5px;font-weight:600;border:0}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.demo{background:var(--ink);color:#fff}
+.pop{position:absolute;right:0;top:calc(100% + 8px);z-index:30;width:min(330px,calc(100vw - 32px));background:var(--panel);border-radius:14px;box-shadow:0 20px 50px rgba(23,27,36,.18);padding:16px;border:1px solid var(--line)}
+.pop p{margin:0 0 8px;color:var(--muted)} .pop p:last-child{margin:0}
+
+/* period + totals ribbon */
+.ribbon{background:var(--panel);border:1px solid var(--line);border-radius:16px;display:flex;align-items:stretch;flex-wrap:wrap}
+.period{display:flex;align-items:center;gap:4px;padding:10px 12px;border-right:1px solid var(--line)}
+.period button.ar{border:0;background:none;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--muted)}
+.period button.ar:hover{background:var(--hover)}
+.period .pv{position:relative}
+.period .pv>button{border:0;background:none;font-weight:600;font-size:16px;padding:6px 8px;border-radius:8px;min-width:150px;display:flex;gap:6px;align-items:center;justify-content:center}
+.period .pv>button:hover{background:var(--hover)}
+.flt{display:flex;align-items:center;padding:10px 12px;border-right:1px solid var(--line);position:relative}
+.tot{display:flex;flex:1;align-items:center;gap:28px;padding:10px 20px;flex-wrap:wrap}
+.tot div small{display:block;color:var(--muted);font-size:12px}
+.tot div b{font-size:17px;font-weight:600;white-space:nowrap}
+.tot .rt{display:flex;gap:6px;margin-left:auto}
+.tot .rt span{font-size:12px;background:var(--hover);border-radius:6px;padding:3px 8px;color:var(--muted)}
+.tot .rt span b{font-size:12px;color:var(--ink)}
+.acts{display:flex;align-items:center;gap:4px;padding:10px 12px;border-left:1px solid var(--line);position:relative}
+.ib{border:0;background:none;height:36px;min-width:36px;padding:0 8px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;color:var(--ink);font-weight:500}
+.ib:hover{background:var(--hover)}
+.ib.pri{background:var(--blue);color:#fff;padding:0 14px}
+.ib.pri:hover{background:#0043B5}
+.ib .n{background:var(--blue);color:#fff;font-size:11px;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 5px}
+.menu{position:absolute;top:calc(100% + 6px);right:0;z-index:30;min-width:240px;background:var(--panel);border-radius:14px;box-shadow:0 20px 50px rgba(23,27,36,.18);padding:6px;border:1px solid var(--line)}
+.menu.l{left:0;right:auto}
+.menu button,.menu label{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:9px 10px;border-radius:9px;cursor:pointer}
+.menu button:hover,.menu label:hover{background:var(--hover)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.menu .mh{font-size:12px;color:var(--faint);padding:6px 10px 2px}
+.menu input[type=checkbox]{accent-color:var(--blue)}
+.monthgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:6px;width:270px}
+.monthgrid button{justify-content:center;padding:10px 4px}
+.monthgrid button[aria-pressed=true]{background:var(--ink);color:#fff}
+.yr{display:flex;justify-content:space-between;align-items:center;padding:6px 6px 0;font-weight:700}
+.panelF{width:min(360px,calc(100vw - 32px));padding:14px;display:grid;gap:12px}
+.panelF label.f{display:grid;gap:4px;font-size:12px;color:var(--muted);font-weight:600;padding:0;cursor:default}
+.panelF label.f:hover{background:none}
+.panelF select{height:40px;border:1px solid var(--line);border-radius:10px;padding:0 10px;font-size:14px;background:var(--panel);color:var(--ink);font-weight:500}
+.panelF .ser{display:flex;gap:6px;flex-wrap:wrap}
+.panelF .ser label{width:auto;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px}
+.panelF .ser label:has(input:checked){background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.panelF .ser input{display:none}
+.panelF .row{display:flex;justify-content:space-between}
+
+/* master/detail */
+.md{display:grid;grid-template-columns:minmax(320px,400px) 1fr;gap:12px;min-height:560px}
+.master{background:var(--panel);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
+.mtools{display:flex;gap:6px;padding:10px;border-bottom:1px solid var(--line);position:relative}
+.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--hover);border-radius:10px;padding:0 10px;color:var(--faint)}
+.search input{border:0;background:none;outline:0;height:36px;flex:1;min-width:0;color:var(--ink)}
+.search:focus-within{box-shadow:0 0 0 2px var(--blue)}
+.items{flex:1;overflow:auto}
+.it{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;border:0;background:none;text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);position:relative}
+.it:hover{background:var(--hover)}
+.it[aria-current=true]{background:var(--blue-soft)}
+.it[aria-current=true]::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--blue)}
+.it .p{font-weight:600}
+.it .g{font-weight:600;text-align:right}
+.it .g.neg{color:var(--err)}
+.it .s{color:var(--muted);font-size:13px;display:flex;gap:8px;flex-wrap:wrap}
+.it .d{color:var(--faint);font-size:13px;text-align:right}
+.dot{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500}
+.dot::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.dot.w{color:var(--warn)} .dot.o{color:var(--ok)}
+.mfoot{display:flex;flex-wrap:wrap;row-gap:6px;justify-content:space-between;align-items:center;padding:8px 10px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;gap:8px}
+.mfoot .pg{display:flex;align-items:center;gap:2px}
+.mfoot .pg button{border:0;background:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center}
+.mfoot .pg button:disabled{opacity:.3;cursor:default}
+.mfoot select{border:1px solid var(--line);background:var(--panel);border-radius:8px;height:30px;font-size:13px}
+
+.detail{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 32px;overflow:auto;position:relative}
+.dback{display:none}
+.dh{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.dh small{color:var(--muted)}
+.dh h2{margin:2px 0 4px;font-size:26px;letter-spacing:-.015em;line-height:1.2}
+.dh .num{color:var(--muted);font-size:15px}
+.dh .amt{text-align:right}
+.dh .amt b{display:block;font-size:30px;letter-spacing:-.02em;line-height:1.1}
+.dh .amt.neg b{color:var(--err)}
+.dacts{display:flex;gap:6px;margin:18px 0 0;flex-wrap:wrap}
+.chipb{border:1px solid var(--line);background:var(--panel);border-radius:10px;height:34px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-weight:500}
+.chipb:hover{background:var(--hover)}
+.ksef{margin:24px 0;border-radius:14px;padding:16px;display:flex;gap:14px;align-items:flex-start}
+.ksef.w{background:var(--warn-soft)} .ksef.o{background:var(--ok-soft)}
+.ksef .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--panel);flex:none}
+.ksef.w .ic{color:var(--warn)} .ksef.o .ic{color:var(--ok)}
+.ksef b{display:block}
+.ksef span{color:var(--muted);word-break:break-all}
+.lines{width:100%;border-collapse:collapse;margin:8px 0 24px}
+.lines th{font-size:12px;color:var(--muted);font-weight:500;text-align:right;padding:8px 0;border-bottom:1px solid var(--line)}
+.lines td{text-align:right;padding:10px 0;border-bottom:1px solid var(--line)}
+.lines th:first-child,.lines td:first-child{text-align:left}
+.lines tfoot td{font-weight:600;border-bottom:0}
+h3{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 4px}
+.meta{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin:0}
+.meta dt{font-size:12px;color:var(--muted)}
+.meta dd{margin:2px 0 0;font-weight:500}
+
+.state{display:grid;place-items:center;text-align:center;padding:48px 24px;gap:8px;height:100%;align-content:center}
+.state .ic{width:52px;height:52px;border-radius:14px;background:var(--hover);display:grid;place-items:center;color:var(--muted)}
+.state .ic svg{width:24px;height:24px}
+.state h3{font-size:17px;color:var(--ink);margin:8px 0 0}
+.state p{margin:0;color:var(--muted);max-width:360px}
+.state .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.state.err .ic{background:var(--err-soft);color:var(--err)}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;height:38px;padding:0 14px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.full{grid-column:1/-1;background:var(--panel);border:1px solid var(--line);border-radius:16px}
+.skel{height:13px;border-radius:6px;background:linear-gradient(90deg,#EEF1F5,#F7F8FA,#EEF1F5);background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+
+
+
+/* ribbon: navy (Granat) */
+html{--rb-bg:linear-gradient(120deg,#15274D 0%,#1F3B76 100%);--rb-border:transparent;--rb-shadow:0 16px 32px -20px rgba(21,39,77,.75);
+  --rb-ink:#fff;--rb-muted:#A9BADB;--rb-line:rgba(255,255,255,.12);--rb-hover:rgba(255,255,255,.1);--rb-chip:rgba(255,255,255,.1);--rb-chip-ink:#C8D4EC;--rb-cta:#fff;--rb-cta-ink:#15274D;--rb-cta-hover:#E4EBF8}
+.ribbon{background:var(--rb-bg);border-color:var(--rb-border);box-shadow:var(--rb-shadow);color:var(--rb-ink)}
+.period,.flt{border-right-color:var(--rb-line)}
+.acts{border-left-color:var(--rb-line)}
+.period button.ar{color:var(--rb-muted)}
+.period .pv>button,.ribbon .ib{color:var(--rb-ink)}
+.period button.ar:hover,.period .pv>button:hover,.ribbon .ib:not(.pri):hover{background:var(--rb-hover);color:var(--rb-ink)}
+.ribbon .ib.pri{background:var(--rb-cta);color:var(--rb-cta-ink)}
+.ribbon .ib.pri:hover{background:var(--rb-cta-hover)}
+.ribbon .ib .n{background:var(--rb-cta);color:var(--rb-cta-ink)}
+.tot div small{color:var(--rb-muted)}
+.tot div b{color:var(--rb-ink)}
+.tot .rt span{background:var(--rb-chip);color:var(--rb-chip-ink)}
+.tot .rt span b{color:var(--rb-ink)}
+.ribbon .menu,.ribbon .menu .ib{color:var(--ink)}
+.ribbon .menu .ib:hover{background:var(--hover)}
+.master,.detail{box-shadow:0 1px 2px rgba(23,27,36,.04),0 10px 30px -22px rgba(23,27,36,.25)}
+.dh h2,.dh .amt b{font-weight:600}
+.ttl h1{font-weight:700}
+
+@media (max-width:1100px){
+  .tot{order:5;flex-basis:100%;border-top:1px solid var(--rb-line);padding:10px 16px;gap:18px}
+  .acts{margin-left:auto}
+  .tot .rt{margin-left:0}
+}
+@media (max-width:820px){
+  .app{padding:12px;gap:10px}
+  .md{grid-template-columns:minmax(0,1fr)}
+  .master{min-height:480px}
+  .detail{position:fixed;inset:0;z-index:50;border-radius:0;border:0;padding:16px 16px 40px;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.7,.2,1)}
+  .detail.on{transform:none}
+  .dback{display:inline-flex;margin:0 0 14px -6px}
+  .dh .amt{text-align:left}
+  .ribbon .period{flex-basis:100%;border-right:0;border-bottom:1px solid var(--rb-line);padding:6px 8px}
+  .period .pv>button{white-space:nowrap}
+  .period .pv>button{min-width:0;flex:1}
+  .period .pv{flex:1;display:flex}
+  .flt{flex:1;border-right:0;padding:6px 8px}
+  .acts{border-left:0;padding:6px 8px}
+  .acts .tx{display:none}
+  .tot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .tot>div{min-width:0}
+  .tot div b{font-size:15px;white-space:normal;overflow-wrap:anywhere}
+  .tot .rt{grid-column:1/-1}
+  .app>header{gap:10px}
+  .st .pop{right:auto;left:0}
+  .ttl{flex-basis:100%}
+  .tabs{flex:1}
+  .tabs button{flex:1}
+}
+@media (max-width:360px){ .tot div b{font-size:13.5px} .tot{padding:10px 12px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* dark theme: deep blue accents, light text on them */
+html[data-theme=dark]{
+  --bg:#0E131B;--panel:#161D29;--ink:#E6EBF3;--muted:#9AA6B8;--faint:#6B778A;--line:#263042;--hover:#1D2534;
+  --blue:#5B8CFF;--blue-soft:rgba(91,140,255,.14);--ok:#5BD6A0;--ok-soft:rgba(91,214,160,.12);--warn:#F2B35E;--warn-soft:rgba(242,179,94,.13);--err:#FF7A7A;--err-soft:rgba(255,122,122,.12);
+  --rb-bg:linear-gradient(120deg,#1B2A4F 0%,#25407A 100%);--rb-border:rgba(255,255,255,.06);--rb-shadow:0 18px 36px -24px rgba(0,0,0,.8);
+  --rb-ink:#EEF3FF;--rb-muted:#9FB2DC;--rb-line:rgba(255,255,255,.1);--rb-hover:rgba(255,255,255,.08);--rb-chip:rgba(255,255,255,.08);--rb-chip-ink:#C6D3F0;--rb-cta:#4C7BEA;--rb-cta-ink:#fff;--rb-cta-hover:#5D89F2;
+  --toast-bg:#2A3F72;--toast-fg:#EEF3FF;color-scheme:dark}
+html[data-theme=dark] body{background:linear-gradient(155deg,#141A25 0%,#0F141C 45%,#0A0E14 100%);background-attachment:fixed}
+html[data-theme=dark] .tabs .thumb{background:linear-gradient(120deg,#25407A,#3358A8);box-shadow:0 6px 14px -8px rgba(0,0,0,.7)}
+html[data-theme=dark] .tabs button[aria-selected=true]{color:#EEF3FF}
+html[data-theme=dark] .badge.demo,html[data-theme=dark] .monthgrid button[aria-pressed=true]{background:#2A3F72;color:#EEF3FF}
+html[data-theme=dark] .btn.pri{background:#3D63D1;border-color:#3D63D1;color:#fff}
+html[data-theme=dark] .skel{background:linear-gradient(90deg,#1D2534,#263042,#1D2534);background-size:200% 100%}
+html[data-theme=dark] .master,html[data-theme=dark] .detail{box-shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px -22px rgba(0,0,0,.65)}
+html[data-theme=dark] .pop,html[data-theme=dark] .menu{box-shadow:0 20px 50px rgba(0,0,0,.55)}
+html.theme-anim,html.theme-anim *{transition:background-color .35s ease,color .35s ease,border-color .35s ease,box-shadow .35s ease!important}
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<div class="app page-enter">
+  <header>
+    <div class="ttl"><nav class="crumbs" aria-label="Ścieżka"><a href="glowna.html"><i data-lucide="arrow-left"></i>Obszary księgowe</a><span>·</span><span>Onsaldo Preview Sp. z o.o.</span></nav><h1>Rejestry i VAT</h1></div>
+    <div class="tabs" role="tablist">
+      <span class="thumb" aria-hidden="true"></span>
+      <button role="tab" data-kind="sales" aria-selected="true">Sprzedaż</button>
+      <button role="tab" data-kind="purchases" aria-selected="false">Zakupy</button>
+    </div>
+    <div class="st">
+      <button class="badge warn" data-menu-toggle="stPop" aria-expanded="false"><i data-lucide="triangle-alert"></i>Wymaga potwierdzenia</button>
+      <span class="badge demo">DEMO</span>
+      <div class="pop js-menu" id="stPop" hidden>
+        <p><b style="color:var(--ink)">Kontekst VAT wymaga potwierdzenia.</b> Poniżej wyłącznie dane demonstracyjne, nie ewidencja organizacji.</p>
+        <p>Sprzedaż i zakupy w wybranym okresie — podgląd danych demonstracyjnych.</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="ribbon" aria-label="Okres i podsumowanie">
+    <div class="period">
+      <button class="ar" data-step="-1" aria-label="Poprzedni miesiąc"><i data-lucide="chevron-left"></i></button>
+      <div class="pv">
+        <button data-menu-toggle="monthMenu" aria-expanded="false" id="periodBtn"></button>
+        <div class="menu l js-menu" id="monthMenu" hidden></div>
+      </div>
+      <button class="ar" data-step="1" aria-label="Następny miesiąc"><i data-lucide="chevron-right"></i></button>
+    </div>
+    <div class="flt">
+      <button class="ib" data-menu-toggle="fMenu" aria-expanded="false"><i data-lucide="filter"></i><span class="tx">Filtry</span><span class="n" id="fN" hidden></span></button>
+      <div class="menu l js-menu" id="fMenu" hidden></div>
+    </div>
+    <div class="tot" id="tot"></div>
+    <div class="acts">
+      <button class="ib" data-act="Etykiety: wybierz dokument, aby dodać etykietę" title="Etykiety"><i data-lucide="tag"></i></button>
+      <button class="ib" data-act="Otwarto podgląd wydruku rejestru" title="Drukuj rejestr"><i data-lucide="printer"></i></button>
+      <button class="ib pri" data-menu-toggle="expMenu" aria-expanded="false"><i data-lucide="download"></i><span class="tx">Eksportuj</span></button>
+      <div class="menu js-menu" id="expMenu" hidden>
+        <button data-act="Pobieranie CSV…"><i data-lucide="file-text"></i>CSV</button>
+        <button data-act="Pobieranie XLSX…"><i data-lucide="sheet"></i>XLSX</button>
+        <button data-act="Pobieranie PDF…"><i data-lucide="file"></i>PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="md" id="md"></section>
+</div>
+
+
+<script>
+const V = VAT, $ = s => document.querySelector(s);
+const QS = new URLSearchParams(location.search);
+const S = { kind: QS.get('k')==='purchases' ? 'purchases' : 'sales', year:2026, month: QS.has('m') ? Math.min(11, Math.max(0, parseInt(QS.get('m'),10) || 0)) : 9, op:'all', jpk:'all', series:[], q:'', sort:{key:'date',dir:1}, page:1, size:10, sel:null, demo:'data', loading:false, mobileOpen:false,
+  show:{ number:true, date:true, ksef:true, ident:false } };
+const SORTS = [['date',1,'Data: od najstarszych'],['date',-1,'Data: od najnowszych'],['party',1,'Kontrahent A–Z'],['number',1,'Numer dokumentu'],['ksef',1,'Numer KSeF'],['ident',1,'Identyfikator'],['gross',-1,'Brutto: od największej']];
+const F = () => ({ op:S.op, jpk:S.jpk, series:S.series });
+const nFilters = () => (S.op!=='all') + (S.jpk!=='all') + S.series.length;
+
+function renderPeriod(){
+  $('#periodBtn').innerHTML = `${S.month==null?'Cały rok':V.cap(V.MONTHS[S.month])} ${S.year}<i data-lucide="chevron-down"></i>`;
+  $('#monthMenu').innerHTML = `<div class="yr"><button class="ib" data-y="-1" aria-label="Poprzedni rok" ${S.year<=2025?'disabled':''}><i data-lucide="chevron-left"></i></button>${S.year}<button class="ib" data-y="1" aria-label="Następny rok" ${S.year>=2026?'disabled':''}><i data-lucide="chevron-right"></i></button></div>
+    <div class="monthgrid">${V.MONTHS_SHORT.map((m,i)=>`<button data-m="${i}" aria-pressed="${S.month===i}">${m}</button>`).join('')}</div>
+    <hr><button data-m="all" style="justify-content:center">Cały rok ${S.year}</button>`;
+  const opt = (arr,v) => `<option value="all">Wszystkie</option>`+arr.map(([k,l])=>`<option value="${k}" ${k===v?'selected':''}>${l}</option>`).join('');
+  $('#fMenu').innerHTML = `<div class="panelF">
+    <label class="f">Rok<select id="fYear">${[2025,2026].map(y=>`<option ${y===S.year?'selected':''}>${y}</option>`).join('')}</select></label>
+    <label class="f">Miesiąc<select id="fMonth"><option value="all">Cały rok</option>${V.MONTHS.map((m,i)=>`<option value="${i}" ${i===S.month?'selected':''}>${m}</option>`).join('')}</select></label>
+    <label class="f">Rodzaj operacji<select id="fOp">${opt(V.OPS[S.kind],S.op)}</select></label>
+    <label class="f">Kod JPK V7<select id="fJpk">${opt(V.JPK,S.jpk)}</select></label>
+    <div><h3>Serie dokumentów</h3><div class="ser">${V.SERIES[S.kind].map(s=>`<label><input type="checkbox" data-series="${s}" ${S.series.includes(s)?'checked':''}>${s}</label>`).join('')}</div></div>
+    <div class="row"><button class="btn" data-clear>Wyczyść filtry</button><button class="btn pri" data-closem>Gotowe</button></div></div>`;
+  $('#fN').hidden = !nFilters(); $('#fN').textContent = nFilters();
+}
+
+function renderTotals(t){
+  $('#tot').innerHTML = S.demo==='error' ? `<div style="grid-column:1/-1"><small>Podsumowanie</small><b style="color:var(--rb-muted)">Kwoty pojawią się po wczytaniu rejestru</b></div>` : `
+    <div><small>Netto</small><b>${V.fmt(t.net)}</b></div><div><small>VAT</small><b>${V.fmt(t.vat)}</b></div><div><small>Brutto</small><b>${V.fmt(t.gross)}</b></div>
+    <div class="rt" title="Kwoty według stawek VAT">${t.byRate.map(r=>`<span>${r.rate} <b>${V.fmtNum(r.vat)}</b></span>`).join('') || '<span>Brak kwot</span>'}</div>`;
+}
+
+function renderMD(){
+  const md = $('#md');
+  if (S.loading){ md.innerHTML = `<div class="master"><div style="padding:14px;display:grid;gap:18px">${Array.from({length:8},()=>`<div class="skel" style="width:${50+Math.random()*45}%"></div>`).join('')}</div></div><div class="detail"><div class="skel" style="width:40%;height:24px"></div></div>`; renderTotals(V.sum([])); return; }
+  if (S.demo==='error'){ renderTotals(); md.innerHTML = `<div class="full"><div class="state err"><div class="ic"><i data-lucide="server-crash"></i></div><h3>${V.ERROR_TITLE}</h3><p>${V.ERROR_TEXT}</p><div class="row"><button class="btn pri" data-retry><i data-lucide="rotate-cw"></i>Spróbuj ponownie</button></div></div></div>`; return; }
+  const { rows, totals } = V.query({ kind:S.kind, year:S.year, month:S.month, ...F(), q:S.q, sort:S.sort });
+  const list = S.demo==='empty' ? [] : rows;
+  renderTotals(S.demo==='empty' ? V.sum([]) : totals);
+  const p = V.page(list, S.page, S.size); S.page = p.page;
+  if (!list.find(d=>d.id===S.sel)) S.sel = p.items[0]?.id || null;
+  const sel = list.find(d=>d.id===S.sel);
+  const filtered = nFilters() || S.q;
+  const sortLabel = SORTS.find(s=>s[0]===S.sort.key&&s[1]===S.sort.dir)?.[2];
+
+  md.innerHTML = `
+  <div class="master">
+    <div class="mtools">
+      <label class="search"><i data-lucide="search"></i><input id="q" type="search" value="${V.esc(S.q)}" placeholder="Szukaj w ${S.kind==='sales'?'sprzedaży':'zakupach'}" aria-label="Szukaj"></label>
+      <button class="ib" data-menu-toggle="sortMenu" aria-expanded="false" title="Sortowanie i pola: ${sortLabel}"><i data-lucide="arrow-down-wide-narrow"></i></button>
+      <div class="menu js-menu" id="sortMenu" hidden>
+        <div class="mh">Sortuj według</div>
+        ${SORTS.map((s,i)=>`<button data-sorti="${i}">${s[0]===S.sort.key&&s[1]===S.sort.dir?'<i data-lucide="check"></i>':'<i data-lucide="check" style="opacity:0"></i>'}${s[2]}</button>`).join('')}
+        <hr><div class="mh">Pola widoczne na liście</div>
+        ${[['number','Numer dokumentu'],['date','Data'],['ksef','Status KSeF'],['ident','Identyfikator']].map(([k,l])=>`<label><input type="checkbox" data-show="${k}" ${S.show[k]?'checked':''}>${l}</label>`).join('')}
+      </div>
+    </div>
+    <div class="items" role="listbox" aria-label="Dokumenty">${list.length ? p.items.map(d=>`
+      <button class="it" role="option" data-id="${d.id}" aria-current="${d.id===S.sel}">
+        <span class="p">${V.esc(d.party)}</span><span class="g ${d.gross<0?'neg':''}">${V.fmt(d.gross)}</span>
+        <span class="s">${S.show.number?`<span>${d.number}</span>`:''}${S.show.ident?`<span>${d.ident}</span>`:''}</span><span class="d">${S.show.date?V.fmtDate(d.date,'short'):''}</span>
+        ${S.show.ksef?`<span class="s">${d.ksef?'<span class="dot o">KSeF potwierdzony</span>':'<span class="dot w">Brak potwierdzenia KSeF</span>'}</span>`:''}
+      </button>`).join('') : `<div class="state"><div class="ic"><i data-lucide="${filtered?'search-x':'inbox'}"></i></div>
+        <h3>${filtered?'Brak wyników':'Brak dokumentów w tym okresie'}</h3>
+        <p>${filtered?'Żaden dokument nie pasuje do wyszukiwania lub filtrów.':'Zmień miesiąc strzałkami u góry albo wybierz okres z listy.'}</p>
+        <div class="row">${filtered?'<button class="btn" data-clear>Wyczyść filtry</button>':'<button class="btn" data-goto>Przejdź do października 2026</button>'}</div></div>`}
+    </div>
+    <div class="mfoot"><span>${list.length?`${p.from}–${p.to} z ${p.total}`:'0 dokumentów'}</span>
+      <div class="pg"><button data-pg="-1" ${p.page<=1?'disabled':''} aria-label="Poprzednia strona"><i data-lucide="chevron-left"></i></button>${p.page}/${p.pages}<button data-pg="1" ${p.page>=p.pages?'disabled':''} aria-label="Następna strona"><i data-lucide="chevron-right"></i></button></div>
+      <select id="size" aria-label="Na stronie">${[10,25,50].map(n=>`<option value="${n}" ${n===S.size?'selected':''}>${n} na stronie</option>`).join('')}</select></div>
+  </div>
+  <article class="detail ${S.mobileOpen?'on':''}" aria-live="polite">${sel ? detail(sel) : `<div class="state"><div class="ic"><i data-lucide="file-search"></i></div><h3>Nie wybrano dokumentu</h3><p>Szczegóły dokumentu pojawią się tutaj po wybraniu go z listy.</p></div>`}</article>`;
+}
+
+function detail(d){
+  return `<button class="ib dback" data-back><i data-lucide="arrow-left"></i>Lista dokumentów</button>
+  <div class="dh"><div><small>${V.KINDS[d.kind].register} · ${d.opLabel}</small><h2>${V.esc(d.party)}</h2><div class="num">${d.number}</div></div>
+    <div class="amt ${d.gross<0?'neg':''}"><small>Brutto</small><b>${V.fmt(d.gross)}</b><small>${V.fmtDate(d.date,'long')}</small></div></div>
+  <div class="dacts"><button class="chipb" data-act="Otwarto wydruk dokumentu ${d.number}"><i data-lucide="printer"></i>Drukuj</button><button class="chipb" data-act="Dodaj etykietę do ${d.number}"><i data-lucide="tag"></i>Etykieta</button><button class="chipb" data-act="Pobieranie ${d.number}.pdf…"><i data-lucide="download"></i>Pobierz</button></div>
+  <div class="ksef ${d.ksef?'o':'w'}"><span class="ic"><i data-lucide="${d.ksef?'badge-check':'clock-alert'}"></i></span><div><b>${d.ksef?'Potwierdzono w KSeF':'Brak potwierdzenia KSeF'}</b><span>${d.ksef?d.ksef:'Dokument nie ma jeszcze numeru KSeF. Pojawi się po potwierdzeniu kontekstu VAT.'}</span></div></div>
+  <h3>Kwoty według stawek VAT</h3>
+  <table class="lines"><thead><tr><th>Stawka</th><th>Netto</th><th>VAT</th><th>Brutto</th></tr></thead>
+  <tbody>${d.lines.map(l=>`<tr><td>${l.rate}</td><td>${V.fmt(l.net)}</td><td>${V.fmt(l.vat)}</td><td>${V.fmt(l.net+l.vat)}</td></tr>`).join('')}</tbody>
+  <tfoot><tr><td>Razem</td><td>${V.fmt(d.net)}</td><td>${V.fmt(d.vat)}</td><td>${V.fmt(d.gross)}</td></tr></tfoot></table>
+  <dl class="meta"><div><dt>Data</dt><dd>${d.date}</dd></div><div><dt>Identyfikator</dt><dd>${d.ident}</dd></div><div><dt>Kod JPK V7</dt><dd>${d.jpk||'Bez kodu'}</dd></div><div><dt>Seria dokumentów</dt><dd>${V.SERIES_LABEL[d.series]}</dd></div><div><dt>Rodzaj operacji</dt><dd>${d.opLabel}</dd></div></dl>`;
+}
+
+function render(){ renderPeriod(); renderMD(); V.icons(); }
+function reset(){ S.page=1; S.sel=null; }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.kind){ if (t.dataset.kind===S.kind) return; const dir = t.dataset.kind==='purchases' ? 'swap-r' : 'swap-l'; S.kind=t.dataset.kind; S.op='all'; S.series=[]; reset(); document.querySelectorAll('[data-kind]').forEach(b=>b.setAttribute('aria-selected',String(b===t))); render(); moveThumb(); const md=$('#md'); md.classList.remove('swap-l','swap-r'); void md.offsetWidth; md.classList.add(dir); }
+  else if (t.dataset.step){ if (S.month==null) S.month=0; let m=S.month+ +t.dataset.step, y=S.year; if(m<0){m=11;y--;} if(m>11){m=0;y++;} if(y>=2025&&y<=2026){S.month=m;S.year=y;} reset(); render(); }
+  else if (t.dataset.m){ S.month = t.dataset.m==='all'?null:+t.dataset.m; reset(); V.closeMenus(); render(); }
+  else if (t.dataset.y){ S.year += +t.dataset.y; reset(); render(); $('#monthMenu').hidden=false; V.fitMenu($('#monthMenu')); }
+  else if (t.dataset.id){ S.sel=t.dataset.id; S.mobileOpen=true; renderMD(); V.icons(); }
+  else if ('back' in t.dataset){ S.mobileOpen=false; $('.detail').classList.remove('on'); }
+  else if (t.dataset.sorti){ const s=SORTS[+t.dataset.sorti]; S.sort={key:s[0],dir:s[1]}; S.page=1; V.closeMenus(); renderMD(); V.icons(); }
+  else if (t.dataset.pg){ S.page += +t.dataset.pg; S.sel=null; renderMD(); V.icons(); }
+  else if ('clear' in t.dataset){ S.op='all'; S.jpk='all'; S.series=[]; S.q=''; reset(); V.closeMenus(); render(); }
+  else if ('closem' in t.dataset) V.closeMenus();
+  else if ('goto' in t.dataset){ S.year=2026; S.month=9; reset(); render(); }
+  else if ('retry' in t.dataset){ demo.set('data'); S.demo='data'; S.loading=true; render(); setTimeout(()=>{S.loading=false; render();},900); }
+  else if (t.dataset.act){ V.closeMenus(); V.toast(t.dataset.act); }
+});
+document.addEventListener('change', e => {
+  const t=e.target, inF = t.closest('#fMenu');
+  if (t.id==='size'){ S.size=+t.value; S.page=1; }
+  else if (t.id==='fYear') S.year=+t.value;
+  else if (t.id==='fMonth') S.month=t.value==='all'?null:+t.value;
+  else if (t.id==='fOp') S.op=t.value;
+  else if (t.id==='fJpk') S.jpk=t.value;
+  else if (t.dataset.series) S.series = t.checked ? [...S.series,t.dataset.series] : S.series.filter(x=>x!==t.dataset.series);
+  else if (t.dataset.show){ S.show[t.dataset.show]=t.checked; renderMD(); V.icons(); $('#sortMenu').hidden=false; V.fitMenu($('#sortMenu')); return; }
+  else return;
+  if (inF) { S.sel=null; S.page=1; render(); $('#fMenu').hidden=false; V.fitMenu($('#fMenu')); } else { renderMD(); V.icons(); }
+});
+document.addEventListener('input', e => {
+  if (e.target.id==='q'){ S.q=e.target.value; reset(); const pos=e.target.selectionStart; renderMD(); V.icons(); const q=$('#q'); q.focus(); q.setSelectionRange(pos,pos); }
+});
+document.addEventListener('keydown', e => {
+  if (!['ArrowDown','ArrowUp'].includes(e.key) || !e.target.closest('.it')) return;
+  e.preventDefault();
+  const n = e.key==='ArrowDown' ? e.target.nextElementSibling : e.target.previousElementSibling;
+  if (n && n.dataset.id){ S.sel=n.dataset.id; renderMD(); V.icons(); document.querySelector(`[data-id="${n.dataset.id}"]`).focus(); }
+});
+
+
+/* sliding thumb for Sprzedaż / Zakupy */
+function moveThumb(instant){
+  const th = document.querySelector('.tabs .thumb'), b = document.querySelector('.tabs [aria-selected=true]');
+  if (!th || !b) return;
+  if (instant) th.style.transition = 'none';
+  th.style.width = b.offsetWidth + 'px';
+  th.style.transform = 'translateX(' + b.offsetLeft + 'px)';
+  if (instant) { void th.offsetWidth; th.style.transition = ''; }
+}
+window.addEventListener('resize', () => moveThumb(true));
+document.fonts && document.fonts.ready.then(() => moveThumb(true));
+
+document.querySelectorAll('[data-kind]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.kind===S.kind)));
+Shell.mount();
+V.bindMenus();
+const demo = V.demoBar(s => { S.demo=s; render(); });
+render();
+moveThumb(true);
+</script>
+</body>
+</html>

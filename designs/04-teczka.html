@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rejestry i VAT — Teczka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<style>
+:root{
+  --desk:#E6ECE7;--paper:#FDFEFC;--ink:#17352C;--muted:#5D7067;--faint:#93A39A;--rule:#D7E1DA;--rule2:#EAF0EC;
+  --tab:#2F5D50;--tab2:#C9D8CF;--stamp:#C2362F;--margin:#E8A6A1;--amber:#9A6400;--ok:#21744F;
+  --toast-bg:#17352C;--toast-r:4px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{overflow-x:clip}
+[hidden]{display:none!important}
+body{background:var(--desk);color:var(--ink);font:400 15px/1.55 "Public Sans",system-ui,sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--tab);outline-offset:2px}
+svg.lucide{width:18px;height:18px;flex:none}
+.serif{font-family:"Spectral",Georgia,serif}
+.num{font-family:"Spectral",Georgia,serif;font-variant-numeric:tabular-nums lining-nums}
+.page{max-width:1240px;margin:0 auto;padding:36px 24px 100px}
+.org{margin:0;color:var(--muted);font-size:14px}
+h1{font-family:"Spectral",serif;font-weight:600;font-size:clamp(32px,4.5vw,48px);line-height:1.05;margin:2px 0 26px;letter-spacing:-.01em}
+
+/* folder tabs */
+.tabs{display:flex;gap:4px;padding-left:18px;position:relative;z-index:1}
+.tabs button{border:0;background:var(--tab2);color:var(--ink);padding:10px 22px 12px;border-radius:12px 12px 0 0;font-weight:600;display:flex;gap:8px;align-items:center;position:relative;top:2px}
+.tabs button[aria-selected=true]{background:var(--paper);top:0;padding-bottom:14px;box-shadow:0 -2px 0 var(--tab) inset}
+.tabs button[aria-selected=true]{box-shadow:none;border-top:3px solid var(--tab)}
+.folder{background:var(--paper);border-radius:4px 16px 16px 16px;box-shadow:0 1px 0 #cdd8d0,0 20px 40px -24px rgba(23,53,44,.35);padding:28px 32px 28px;position:relative}
+
+.fhead{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.period{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.period .lbl{color:var(--muted);font-size:14px}
+.period select{border:0;border-bottom:2px dotted var(--faint);background:none;font-family:"Spectral",serif;font-size:28px;font-weight:600;padding:0 22px 0 0;appearance:none;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-position:calc(100% - 10px) 60%,calc(100% - 4px) 60%;background-size:6px 6px;background-repeat:no-repeat}
+.period select:hover{border-bottom-color:var(--ink)}
+.sub{margin:4px 0 0;color:var(--muted);font-size:14px;max-width:46ch}
+
+/* the stamp — the one bold element */
+.stampwrap{position:relative}
+.stamp{border:0;background:none;padding:0;transform:rotate(-6deg);color:var(--stamp);display:block}
+.stamp span{display:block;border:3px solid currentColor;border-radius:8px;padding:6px 14px 5px;font:700 15px/1.15 "Public Sans",sans-serif;letter-spacing:.06em;text-align:center;opacity:.9;
+  -webkit-mask:radial-gradient(circle at 30% 40%,#000 60%,rgba(0,0,0,.75) 61%) ;}
+.stamp small{display:block;font-weight:600;font-size:11px;letter-spacing:.12em;margin-top:2px}
+.stamp:hover span{opacity:1}
+.note{position:absolute;right:0;top:calc(100% + 14px);z-index:20;width:min(320px,calc(100vw - 40px));background:#FFFDF2;border:1px solid #EADFAE;padding:14px 16px;font-size:14px;box-shadow:0 14px 30px rgba(23,53,44,.18);transform:rotate(.6deg)}
+.note p{margin:0 0 6px} .note p:last-child{margin:0;color:var(--muted)}
+
+/* toolbar */
+.tools{display:flex;gap:8px;align-items:center;margin:24px 0 0;flex-wrap:wrap}
+.search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;border-bottom:1.5px solid var(--rule);padding:0 2px;color:var(--faint)}
+.search:focus-within{border-color:var(--ink);color:var(--ink)}
+.search input{flex:1;min-width:0;border:0;outline:0;background:none;height:40px;color:var(--ink)}
+.tb{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 12px;border:1px solid var(--rule);background:var(--paper);border-radius:6px;font-weight:600;font-size:14px}
+.tb:hover{border-color:var(--ink)}
+.tb[aria-expanded=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tb.ic{width:38px;padding:0;justify-content:center}
+.tb .n{background:var(--stamp);color:#fff;font-size:11px;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 5px}
+.mw{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 6px);z-index:20;min-width:230px;background:var(--paper);border:1px solid var(--rule);border-radius:8px;box-shadow:0 14px 30px rgba(23,53,44,.16);padding:6px}
+.menu button,.menu label{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;padding:9px 10px;border-radius:6px;font-size:14px;text-align:left;cursor:pointer}
+.menu button:hover,.menu label:hover{background:var(--rule2)}
+.menu hr{border:0;border-top:1px dashed var(--rule);margin:6px 0}
+.menu .mh{font-size:12px;color:var(--muted);padding:6px 10px 2px}
+.menu input{accent-color:var(--tab)}
+.menu .arr{margin-left:auto;display:flex;gap:2px}
+.menu .arr span{padding:3px;border-radius:4px;color:var(--muted)} .menu .arr span:hover{background:var(--rule)}
+
+/* index card filters */
+.card{margin-top:14px;border:1px solid var(--rule);border-radius:6px;background:repeating-linear-gradient(transparent 0 31px,var(--rule2) 31px 32px),#FFFFFB;padding:16px 18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:14px 18px;align-items:end}
+.card label.f{display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:600}
+.card select{height:40px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);padding:0 10px;color:var(--ink);font-weight:500}
+.card .ser{grid-column:1/-2;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card .ser>span{font-size:13px;color:var(--muted);font-weight:600;margin-right:4px}
+.card .ser label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);border-radius:999px;padding:4px 12px;font-size:13px;background:var(--paper);cursor:pointer}
+.card .ser label:has(input:checked){border-color:var(--tab);background:#E3EEE8}
+.card .ser input{accent-color:var(--tab);margin:0}
+.link{border:0;background:none;color:var(--stamp);font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:8px 0}
+
+/* body: ledger + receipt */
+.body{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;margin-top:24px;align-items:start}
+.ledger{position:relative;overflow-x:auto}
+.ledger table{width:100%;border-collapse:collapse;min-width:640px}
+.ledger th{text-align:left;font-weight:600;font-size:13px;color:var(--muted);border-bottom:2px solid var(--ink);padding:0}
+.ledger th button{border:0;background:none;padding:10px 10px 8px;display:flex;gap:4px;align-items:center;font-weight:600;width:100%;color:inherit}
+.ledger th button svg{width:14px;height:14px;opacity:.35}
+.ledger th[aria-sort] button{color:var(--ink)} .ledger th[aria-sort] svg{opacity:1}
+.ledger td{padding:12px 10px;border-bottom:1px solid var(--rule);font-size:14px;white-space:nowrap}
+.ledger tr.r{cursor:pointer}
+.ledger tr.r:hover td{background:#F6F9F7}
+.ledger td:first-child,.ledger th:first-child{border-left:2px solid var(--margin);padding-left:14px}
+.ledger .p{font-weight:600}
+.ledger .m{color:var(--muted)}
+.ledger .amt{text-align:right;font-size:16px}
+.ledger th.amt button{justify-content:flex-end}
+.ledger .neg{color:var(--stamp)}
+.ks{font-size:12.5px;font-weight:600;color:var(--amber);border:1px dashed currentColor;border-radius:4px;padding:2px 6px}
+.ks.ok{color:var(--ok);border-style:solid}
+.ex td{background:#F6F9F7;white-space:normal}
+.ex .inner{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) 1.4fr;gap:10px 18px;font-size:13px}
+.ex dt{color:var(--muted)} .ex dd{margin:0;font-weight:500;word-break:break-all}
+.ex .ln{font-family:"Spectral",serif;font-size:14px}
+.ledger tfoot td{border-bottom:0;padding-top:16px;color:var(--muted);font-size:14px}
+.pager{display:flex;align-items:center;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.pager button{border:1px solid var(--rule);background:var(--paper);width:34px;height:34px;border-radius:6px;display:grid;place-items:center}
+.pager button:disabled{opacity:.35;cursor:default}
+.pager select{border:1px solid var(--rule);border-radius:6px;background:var(--paper);height:34px;padding:0 6px}
+
+/* receipt */
+.receipt{background:#fff;padding:22px 22px 26px;position:sticky;top:20px;filter:drop-shadow(0 10px 16px rgba(23,53,44,.12));
+  -webkit-mask:radial-gradient(circle 6px at 50% 100%,transparent 98%,#000) 0 0/16px 100% repeat-x;mask:radial-gradient(circle 6px at 50% 100%,transparent 98%,#000) 0 0/16px 100%;}
+.receipt h2{font-family:"Spectral",serif;font-size:20px;font-weight:600;margin:0;text-align:center}
+.receipt .rs{text-align:center;color:var(--muted);font-size:13px;margin:2px 0 14px}
+.receipt .dash{border-top:1.5px dashed var(--faint);margin:12px 0}
+.receipt .rl{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:3px 0}
+.receipt .rl span:first-child{color:var(--muted)}
+.receipt .rl.t{font-size:15px;font-weight:600}
+.receipt .rl.t span:first-child{color:var(--ink)}
+.receipt .total{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
+.receipt .total span{font-weight:700}
+.receipt .total b{font-family:"Spectral",serif;font-size:28px}
+.receipt .sm{font-size:12px;color:var(--faint);text-align:center;margin-top:12px}
+
+.state{text-align:center;padding:56px 20px;display:grid;justify-items:center;gap:6px}
+.state .ill{width:72px;height:56px;border:2px solid var(--rule);border-radius:4px 10px 10px 10px;position:relative;margin-bottom:10px}
+.state .ill::before{content:"";position:absolute;left:-2px;top:-12px;width:30px;height:12px;border:2px solid var(--rule);border-bottom:0;border-radius:6px 6px 0 0}
+.state h3{font-family:"Spectral",serif;font-size:24px;margin:0;font-weight:600}
+.state p{color:var(--muted);margin:0 0 10px;max-width:420px}
+.state.err h3{color:var(--stamp)}
+.state.err .ill{border-color:var(--margin)} .state.err .ill::before{border-color:var(--margin)}
+.btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);font-weight:600}
+.btn.o{background:none;color:var(--ink)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.skel{height:14px;background:linear-gradient(90deg,#EDF2EE,#F8FAF8,#EDF2EE);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:3px;margin:20px 0}
+@keyframes sk{to{background-position:-200% 0}}
+
+@media (max-width:1000px){
+  .body{grid-template-columns:1fr}
+  .receipt{position:static;order:-1}
+  .receipt .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+  .card{grid-template-columns:1fr 1fr}
+  .card .ser{grid-column:1/-1}
+}
+@media (max-width:640px){
+  .page{padding:20px 12px 100px}
+  h1{margin-bottom:18px}
+  .tabs{padding-left:10px}
+  .tabs button{padding:9px 14px 11px;font-size:14px}
+  .folder{padding:18px 16px;border-radius:4px 12px 12px 12px}
+  .period select{font-size:22px}
+  .stamp span{font-size:12px;padding:5px 10px 4px}
+  .tools .tx{display:none}
+  .search{flex-basis:100%}
+  .tools .sp{flex:1}
+  .receipt .cols{display:block}
+  .card{grid-template-columns:1fr}
+  /* ledger -> entries */
+  .ledger table{min-width:0}
+  .ledger thead{display:none}
+  .ledger table,.ledger tbody{display:block}
+  .ledger tr.r{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 4px 12px 14px;border-bottom:1px solid var(--rule);border-left:2px solid var(--margin)}
+  .ledger tr.r td{border:0!important;padding:0!important;background:none!important}
+  .ledger td[data-c=party]{grid-column:1}
+  .ledger td.amt{grid-column:2;grid-row:1}
+  .ledger td[data-c=number]{grid-column:1;font-size:13px}
+  .ledger td[data-c=date]{grid-column:2;grid-row:2;text-align:right;font-size:13px}
+  .ledger td[data-c=ksef]{grid-column:1}
+  .ledger td[data-c=ident]{grid-column:2;text-align:right;font-size:12px}
+  .ledger td.chev{display:none}
+  .ledger tr.ex{display:block} .ledger tr.ex td{display:block;border-left:2px solid var(--margin)}
+  .ex .inner{grid-template-columns:1fr 1fr}
+  .ledger tfoot{display:block} .ledger tfoot tr,.ledger tfoot td{display:block}
+  .pager{justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+  <p class="org">Onsaldo Preview Sp. z o.o.</p>
+  <h1>Rejestry i VAT</h1>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" data-kind="sales" aria-selected="true"><i data-lucide="receipt"></i>Rejestr VAT sprzedaży</button>
+    <button role="tab" data-kind="purchases" aria-selected="false"><i data-lucide="shopping-bag"></i>Rejestr VAT zakupów</button>
+  </div>
+  <section class="folder">
+    <div class="fhead">
+      <div>
+        <div class="period"><span class="lbl">Okres</span>
+          <select id="pMonth" aria-label="Miesiąc"></select>
+          <select id="pYear" aria-label="Rok"></select>
+        </div>
+        <p class="sub">Sprzedaż i zakupy w wybranym okresie — podgląd danych demonstracyjnych.</p>
+      </div>
+      <div class="stampwrap">
+        <button class="stamp" data-menu-toggle="note" aria-expanded="false" aria-label="Status: wymaga potwierdzenia, dane demonstracyjne"><span>WYMAGA POTWIERDZENIA<small>DEMO</small></span></button>
+        <div class="note js-menu" id="note" hidden>
+          <p><b>Kontekst VAT wymaga potwierdzenia.</b></p>
+          <p>Poniżej wyłącznie dane demonstracyjne, nie ewidencja organizacji.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tools">
+      <label class="search"><i data-lucide="search"></i><input id="q" type="search" placeholder="Szukaj kontrahenta, numeru dokumentu lub KSeF" aria-label="Szukaj"></label>
+      <span class="sp"></span>
+      <button class="tb" id="fBtn" aria-expanded="false" aria-controls="fCard"><i data-lucide="sliders-horizontal"></i><span class="tx">Filtry</span><span class="n" id="fN" hidden></span></button>
+      <button class="tb ic" data-act="Etykiety: zaznacz wpis, aby go oznaczyć" title="Etykiety" aria-label="Etykiety"><i data-lucide="tag"></i></button>
+      <button class="tb ic" data-act="Otwarto podgląd wydruku" title="Drukuj" aria-label="Drukuj"><i data-lucide="printer"></i></button>
+      <div class="mw">
+        <button class="tb" data-menu-toggle="exp" aria-expanded="false"><i data-lucide="download"></i><span class="tx">Pobierz</span></button>
+        <div class="menu js-menu" id="exp" hidden>
+          <button data-act="Pobieranie CSV…"><i data-lucide="file-text"></i>CSV</button>
+          <button data-act="Pobieranie XLSX…"><i data-lucide="sheet"></i>XLSX</button>
+          <button data-act="Pobieranie PDF…"><i data-lucide="file"></i>PDF</button>
+          <hr><button id="colsOpen" data-menu-toggle="cols"><i data-lucide="columns-3"></i>Kolumny rejestru…</button>
+        </div>
+      </div>
+      <div class="mw"><div class="menu js-menu" id="cols" hidden></div></div>
+    </div>
+    <div class="card" id="fCard" hidden></div>
+
+    <div class="body" id="body"></div>
+  </section>
+</main>
+
+<script>
+const V = VAT, $ = s => document.querySelector(s);
+const S = { kind:'sales', year:2026, month:9, op:'all', jpk:'all', series:[], q:'', sort:{key:'date',dir:1}, page:1, size:10, open:null, demo:'data', loading:false,
+  cols: V.COLUMNS.map(c=>({...c,on:true})) };
+const nF = () => (S.op!=='all')+(S.jpk!=='all')+S.series.length;
+
+function renderPeriod(){
+  $('#pMonth').innerHTML = `<option value="all">cały rok</option>`+V.MONTHS.map((m,i)=>`<option value="${i}" ${i===S.month?'selected':''}>${m}</option>`).join('');
+  $('#pYear').innerHTML = [2025,2026].map(y=>`<option ${y===S.year?'selected':''}>${y}</option>`).join('');
+  const opt=(a,v)=>`<option value="all">Wszystkie</option>`+a.map(([k,l])=>`<option value="${k}" ${k===v?'selected':''}>${l}</option>`).join('');
+  $('#fCard').innerHTML = `
+    <label class="f">Rok<select id="fYear">${[2025,2026].map(y=>`<option ${y===S.year?'selected':''}>${y}</option>`).join('')}</select></label>
+    <label class="f">Miesiąc<select id="fMonth"><option value="all">Cały rok</option>${V.MONTHS.map((m,i)=>`<option value="${i}" ${i===S.month?'selected':''}>${m}</option>`).join('')}</select></label>
+    <label class="f">Rodzaj operacji<select id="fOp">${opt(V.OPS[S.kind],S.op)}</select></label>
+    <label class="f">Kod JPK V7<select id="fJpk">${opt(V.JPK,S.jpk)}</select></label>
+    <span></span>
+    <div class="ser"><span>Serie dokumentów</span>${V.SERIES[S.kind].map(s=>`<label><input type="checkbox" data-series="${s}" ${S.series.includes(s)?'checked':''}>${V.SERIES_LABEL[s]}</label>`).join('')}</div>
+    <button class="link" data-clear>Wyczyść filtry</button>`;
+  $('#fN').hidden=!nF(); $('#fN').textContent=nF();
+  $('#cols').innerHTML = `<div class="mh">Kolumny rejestru</div>`+S.cols.map((c,i)=>`<label><input type="checkbox" data-col="${i}" ${c.on?'checked':''}>${c.label}<span class="arr"><span data-mv="${i}:-1" role="button" aria-label="W lewo">↑</span><span data-mv="${i}:1" role="button" aria-label="W prawo">↓</span></span></label>`).join('');
+}
+
+function receipt(t, list){
+  const period = S.month==null ? `cały rok ${S.year}` : `${V.MONTHS[S.month]} ${S.year}`;
+  return `<aside class="receipt" aria-label="Podsumowanie">
+    <h2>Podsumowanie</h2><div class="rs">${V.KINDS[S.kind].register.toLowerCase()} · ${period}</div>
+    <div class="cols"><div>
+    <div class="rl"><span>Dokumenty</span><span class="num">${t.count}</span></div>
+    <div class="dash"></div>
+    <div class="rl" style="color:var(--muted);font-size:12px"><span>Kwoty według stawek VAT</span><span></span></div>
+    ${t.byRate.length ? t.byRate.map(r=>`<div class="rl"><span>${r.rate} · netto ${V.fmtNum(r.net)}</span><span class="num">${V.fmtNum(r.vat)}</span></div>`).join('') : '<div class="rl"><span>brak pozycji</span><span class="num">0,00</span></div>'}
+    </div><div>
+    <div class="dash"></div>
+    <div class="rl t"><span>Netto</span><span class="num">${V.fmt(t.net)}</span></div>
+    <div class="rl t"><span>VAT</span><span class="num">${V.fmt(t.vat)}</span></div>
+    <div class="dash"></div>
+    <div class="total"><span>Brutto</span><b class="num">${V.fmt(t.gross)}</b></div>
+    </div></div>
+    <div class="sm">Dane demonstracyjne · nie stanowią ewidencji</div>
+  </aside>`;
+}
+
+function renderBody(){
+  const b = $('#body');
+  if (S.loading){ b.innerHTML = `<div>${Array.from({length:8},()=>`<div class="skel" style="width:${55+Math.random()*40}%"></div>`).join('')}</div><div class="receipt" style="height:300px"></div>`; return; }
+  if (S.demo==='error'){ b.style.display='block'; b.innerHTML = `<div class="state err"><div class="ill"></div><h3>${V.ERROR_TITLE}</h3><p>${V.ERROR_TEXT}</p><div class="acts"><button class="btn" data-retry><i data-lucide="rotate-cw"></i>Spróbuj ponownie</button></div></div>`; return; }
+  b.style.display='';
+  const { rows, totals } = V.query({ kind:S.kind, year:S.year, month:S.month, op:S.op, jpk:S.jpk, series:S.series, q:S.q, sort:S.sort });
+  const list = S.demo==='empty' ? [] : rows, t = S.demo==='empty' ? V.sum([]) : totals;
+  const p = V.page(list, S.page, S.size); S.page=p.page;
+  const cols = S.cols.filter(c=>c.on);
+  const si = k => S.sort.key===k ? (S.sort.dir>0?'arrow-up':'arrow-down') : 'arrow-up-down';
+  const as = k => S.sort.key===k ? `aria-sort="${S.sort.dir>0?'ascending':'descending'}"` : '';
+  const cell = (c,d) => c.key==='party' ? `<td data-c="party" class="p">${V.esc(d.party)}</td>` :
+    c.key==='ksef' ? `<td data-c="ksef">${d.ksef?`<span class="ks ok" title="${d.ksef}">Potwierdzono</span>`:'<span class="ks">Brak potwierdzenia</span>'}</td>` :
+    c.key==='date' ? `<td data-c="date" class="num">${d.date}</td>` : `<td data-c="${c.key}" class="m">${V.esc(d[c.key])}</td>`;
+  const filtered = nF() || S.q;
+  const ledger = !list.length ? `<div class="state"><div class="ill"></div>
+      <h3>${filtered?'Nic nie pasuje do filtrów':'Teczka jest pusta'}</h3>
+      <p>${filtered?'Zmień frazę wyszukiwania lub wyczyść filtry, aby zobaczyć wszystkie wpisy z okresu.':`W okresie ${S.month==null?S.year:V.MONTHS[S.month]+' '+S.year} nie ma żadnych dokumentów. Wybierz inny okres u góry.`}</p>
+      <div class="acts">${filtered?'<button class="btn o" data-clear>Wyczyść filtry</button>':''}<button class="btn" data-goto>Otwórz październik 2026</button></div></div>` : `
+    <table><thead><tr>${cols.map(c=>`<th ${as(c.key)}><button data-sort="${c.key}">${c.label}<i data-lucide="${si(c.key)}"></i></button></th>`).join('')}<th class="amt" ${as('gross')}><button data-sort="gross">Brutto<i data-lucide="${si('gross')}"></i></button></th><th style="width:30px"></th></tr></thead>
+    <tbody>${p.items.map(d=>`<tr class="r" data-id="${d.id}" tabindex="0" aria-expanded="${S.open===d.id}">${cols.map(c=>cell(c,d)).join('')}<td class="amt num ${d.gross<0?'neg':''}">${V.fmt(d.gross)}</td><td class="chev"><i data-lucide="${S.open===d.id?'chevron-up':'chevron-down'}"></i></td></tr>
+      ${S.open===d.id?`<tr class="ex"><td colspan="${cols.length+2}"><dl class="inner">
+        <div><dt>Rodzaj operacji</dt><dd>${d.opLabel}</dd></div><div><dt>Kod JPK V7</dt><dd>${d.jpk||'Bez kodu'}</dd></div><div><dt>Seria</dt><dd>${d.series}</dd></div><div><dt>Numer KSeF</dt><dd>${d.ksef||'Brak potwierdzenia'}</dd></div>
+        <div><dt>Stawki</dt><dd class="ln">${d.lines.map(l=>`${l.rate}: ${V.fmtNum(l.net)} + ${V.fmtNum(l.vat)} VAT`).join('<br>')}</dd></div></dl></td></tr>`:''}`).join('')}</tbody>
+    <tfoot><tr><td colspan="${cols.length+2}"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span>Wpisy ${p.from}–${p.to} z ${p.total}</span>
+      <div class="pager"><button data-pg="-1" ${p.page<=1?'disabled':''} aria-label="Poprzednia strona"><i data-lucide="chevron-left"></i></button><span class="num">${p.page} / ${p.pages}</span><button data-pg="1" ${p.page>=p.pages?'disabled':''} aria-label="Następna strona"><i data-lucide="chevron-right"></i></button>
+      <select id="size" aria-label="Na stronie">${[10,25,50].map(n=>`<option value="${n}" ${n===S.size?'selected':''}>${n} na stronie</option>`).join('')}</select></div></div></td></tr></tfoot></table>`;
+  b.innerHTML = `<div class="ledger">${ledger}</div>${receipt(t,list)}`;
+}
+
+function render(){ renderPeriod(); renderBody(); V.icons(); }
+function clear(){ S.op='all'; S.jpk='all'; S.series=[]; S.q=''; $('#q').value=''; S.page=1; }
+
+document.addEventListener('click', e => {
+  const mv = e.target.closest('[data-mv]');
+  if (mv){ e.preventDefault(); const [i,d]=mv.dataset.mv.split(':').map(Number); if(i+d<0||i+d>=S.cols.length) return; const c=S.cols.splice(i,1)[0]; S.cols.splice(i+d,0,c); render(); $('#cols').hidden=false; return; }
+  const t = e.target.closest('button,tr.r'); if (!t) return;
+  if (t.dataset.kind){ S.kind=t.dataset.kind; S.op='all'; S.series=[]; S.page=1; S.open=null; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-selected',String(x===t))); render(); }
+  else if (t.id==='fBtn'){ const c=$('#fCard'); c.hidden=!c.hidden; t.setAttribute('aria-expanded',String(!c.hidden)); }
+  else if (t.dataset.sort){ const k=t.dataset.sort; S.sort={key:k,dir:S.sort.key===k?-S.sort.dir:1}; renderBody(); V.icons(); }
+  else if (t.dataset.id){ S.open = S.open===t.dataset.id?null:t.dataset.id; renderBody(); V.icons(); }
+  else if (t.dataset.pg){ S.page+= +t.dataset.pg; S.open=null; renderBody(); V.icons(); }
+  else if ('clear' in t.dataset){ clear(); render(); }
+  else if ('goto' in t.dataset){ clear(); S.year=2026; S.month=9; render(); }
+  else if ('retry' in t.dataset){ demo.set('data'); S.demo='data'; S.loading=true; render(); setTimeout(()=>{S.loading=false; render();},900); }
+  else if (t.dataset.act){ V.closeMenus(); V.toast(t.dataset.act); }
+});
+document.addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ') && e.target.matches('tr.r')){ e.preventDefault(); e.target.click(); } });
+document.addEventListener('change', e => {
+  const t=e.target;
+  if (t.id==='pMonth'||t.id==='fMonth') S.month = t.value==='all'?null:+t.value;
+  else if (t.id==='pYear'||t.id==='fYear') S.year=+t.value;
+  else if (t.id==='fOp') S.op=t.value;
+  else if (t.id==='fJpk') S.jpk=t.value;
+  else if (t.dataset.series) S.series = t.checked?[...S.series,t.dataset.series]:S.series.filter(x=>x!==t.dataset.series);
+  else if (t.id==='size') S.size=+t.value;
+  else if (t.dataset.col){ S.cols[+t.dataset.col].on=t.checked; if(!S.cols.some(c=>c.on)){S.cols[+t.dataset.col].on=true;} renderBody(); V.icons(); return; }
+  else return;
+  S.page=1; S.open=null; render();
+});
+$('#q').addEventListener('input', e => { S.q=e.target.value; S.page=1; renderBody(); V.icons(); });
+
+V.bindMenus();
+const demo = V.demoBar(s => { S.demo=s; render(); });
+render();
+</script>
+</body>
+</html>

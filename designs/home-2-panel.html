@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obszary księgowe — Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="dark-ready" content="1">
+<link rel="stylesheet" href="shared/base.css">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<script src="shared/shell.js"></script>
+<script src="shared/home.js"></script>
+<style>
+.app2{max-width:1360px;margin:0 auto;padding:20px 20px 96px;display:grid;grid-template-columns:268px minmax(0,1fr);gap:20px;align-items:start}
+.nav{position:sticky;top:16px;background:var(--navy-grad);color:var(--on-navy);border-radius:20px;padding:16px 12px;box-shadow:0 16px 32px -20px rgba(21,39,77,.75);display:grid;gap:12px}
+.nav .org{padding:4px 8px 10px;border-bottom:1px solid var(--navy-line)}
+.nav .org small{display:block;color:var(--navy-muted);font-size:12px}
+.nav .org b{font-weight:600}
+.nav h2{margin:4px 8px 0;font-size:12px;font-weight:500;color:var(--navy-muted)}
+.nav ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;text-decoration:none;color:var(--on-navy-soft);font-weight:500}
+.nav a:hover{background:var(--on-navy-hover)}
+.nav a.on{background:var(--on-navy-active);color:var(--on-navy)}
+.nav a .d{margin-left:auto;width:8px;height:8px;border-radius:50%}
+.nav .sub a{padding:7px 10px 7px 38px;font-size:13.5px;color:var(--on-navy-dim)}
+.d.confirm{background:var(--dot-confirm)} .d.config{background:var(--dot-config)} .d.na{background:var(--dot-na)}
+.nav .per{margin-top:4px;padding:12px;border-radius:14px;background:var(--on-navy-hover);font-size:13px}
+.nav .chip{background:var(--on-navy-active);color:var(--on-navy)}
+.nav .per b{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:4px}
+.nav .per p{margin:0 0 8px;color:var(--navy-muted)}
+.nav .legend{display:flex;flex-wrap:wrap;gap:4px 12px;padding:0 8px;font-size:11.5px;color:var(--navy-muted)}
+.nav .legend span{display:flex;align-items:center;gap:5px}
+.nav .legend .d{width:7px;height:7px;border-radius:50%;margin:0}
+
+.main{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;min-width:0}
+.widgets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.w{padding:18px}
+.w h2{margin:0 0 2px;font-size:16px;font-weight:600}
+.w .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+.w.vat{grid-column:span 2;display:grid;grid-template-rows:auto auto 1fr;gap:16px}
+.w.vat .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.w.vat h2{font-size:20px;letter-spacing:-.01em}
+.kp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:auto auto;column-gap:10px;row-gap:10px}
+/* subgrid: every label shares one row and every value shares the next, so values always line up */
+.kp div{grid-row:span 2;display:grid;grid-template-rows:subgrid;row-gap:4px;background:var(--tint);border-radius:14px;padding:14px 16px}
+.kp small{align-self:end;line-height:1.3;color:var(--muted);font-size:12.5px}
+.kp b{align-self:start}
+.spark{display:flex;flex-direction:column;gap:8px;min-height:120px}
+.spark .sh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12.5px;color:var(--muted)}
+.spark .sh a{color:var(--navy2);font-weight:600;text-decoration:none}
+.spark .sh a:hover{text-decoration:underline}
+.bars{flex:1;display:flex;align-items:stretch;gap:6px;min-height:84px}
+.bars a,.bars span.f{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;text-decoration:none;min-width:0}
+.bars i{display:block;width:100%;max-width:34px;height:var(--h);min-height:4px;border-radius:6px 6px 3px 3px;background:var(--bar);transition:background .15s}
+.bars a:hover i{background:var(--bar-hover)}
+.bars a.cur i{background:var(--navy-grad)}
+.bars span.f i{height:4px;background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 6px)}
+.bars small{font-size:11px;color:var(--muted)}
+.bars a.cur small{color:var(--ink);font-weight:700}
+:root{--bar:#C9D5EE;--bar-hover:#9FB2DA}
+html[data-theme=dark]{--bar:#2E3A52;--bar-hover:#46557A}
+.kp b{font-size:17px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.kp .warn b{color:var(--warn)}
+.todo{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.todo button{display:flex;gap:10px;align-items:flex-start;width:100%;border:0;background:none;text-align:left;padding:9px 8px;border-radius:10px}
+.todo button:hover{background:var(--hover)}
+.todo .cb{width:18px;height:18px;border-radius:6px;border:1.5px solid var(--faint);flex:none;margin-top:1px}
+.todo b{display:block;font-weight:600;font-size:13.5px}
+.todo small{color:var(--muted);font-size:12.5px}
+.w.per p{margin:0 0 12px;color:var(--muted);font-size:13.5px}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:12px;color:var(--muted);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.tbl td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr.r{cursor:pointer}
+.tbl tr.r:hover td{background:var(--hover)}
+.tbl .nm{display:flex;gap:10px;align-items:center;font-weight:600}
+.tbl .nm .ai{width:30px;height:30px;border-radius:9px;background:var(--hover);display:grid;place-items:center;color:var(--muted)}
+.tbl .nm .ai svg{width:16px;height:16px}
+.prog{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.prog .b{width:80px;height:6px;border-radius:3px;background:var(--hover);overflow:hidden}
+.prog .b i{display:block;height:100%;background:var(--ok)}
+.tbl tr.ex td{background:var(--hover);padding:6px 10px 14px 50px}
+.tbl tr.ex .in{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;flex-wrap:wrap}
+
+@media (max-width:1080px){ .widgets{grid-template-columns:1fr 1fr} .w.vat{grid-column:1/-1} .kp{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:860px){
+  .app2{grid-template-columns:minmax(0,1fr);padding:12px 12px 96px}
+  .nav{min-width:0}
+  .nav>ul{min-width:0}
+  .nav{position:static;padding:12px}
+  .nav .org,.nav h2,.nav .legend{display:none}
+  .nav>ul{display:flex;overflow-x:auto;gap:6px;scrollbar-width:none}
+  .nav>ul>li>a{white-space:nowrap;background:var(--on-navy-hover)}
+  .nav .sub{display:none}
+  .nav .per{margin:0}
+}
+@media (max-width:600px){ .widgets{grid-template-columns:minmax(0,1fr)} .w{min-width:0} .w[style]{grid-column:auto!important} .tbl .chip{white-space:normal} .tbl .hide-m{display:none} .tbl tr.ex td{padding-left:10px} }
+html[data-theme=dark] .nav{box-shadow:0 16px 36px -24px rgba(157,184,255,.45)}
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<div class="app2 page-enter">
+  <aside class="nav" aria-label="Obszary">
+    <div class="org"><small>Organizacja</small><b>Onsaldo Preview Sp. z o.o.</b></div>
+    <h2>Obszary</h2>
+    <ul id="navList"></ul>
+    <div class="legend"><span><i class="d confirm"></i>potwierdzenie</span><span><i class="d config"></i>konfiguracja</span><span><i class="d na"></i>niedostępne</span></div>
+    <div class="per" id="navPer"></div>
+  </aside>
+  <main class="main">
+    <div class="pg-h"><nav class="crumbs"><span>Ewidencje</span></nav><h1>Obszary księgowe</h1><p>Mapa dostępnych obszarów księgowych dla aktywnej organizacji.</p></div>
+    <div class="note" role="note"><i data-lucide="info"></i><span id="note"></span></div>
+    <section class="widgets">
+      <article class="card w vat" id="wVat"></article>
+      <article class="card w" id="wTodo"></article>
+      <article class="card w per" id="wPer"></article>
+      <article class="card w" style="grid-column:span 2" id="wAvail"></article>
+    </section>
+  </main>
+</div>
+<script>
+const V = VAT, H = HOME, $ = s => document.querySelector(s);
+Shell.mount({ home:true });
+
+const dotOf = id => { const items = H.availOf(id); const st = items.find(i=>i.status==='confirm') ? 'confirm' : items.find(i=>i.status==='config') ? 'config' : 'na'; return st; };
+$('#navList').innerHTML = H.AREAS.map(a => {
+  const items = H.availOf(a.id);
+  return `<li><a href="${a.href}" class="${a.live?'on':''}"><i data-lucide="${a.icon}"></i>${a.name}<i class="d ${dotOf(a.id)}" title="${H.STATUS[dotOf(a.id)].label}"></i></a>
+    ${a.id==='ksiegowania' ? `<ul class="sub">${items.map(i=>`<li><a href="${i.href}">${i.name}<i class="d ${i.status}" title="${H.STATUS[i.status].label}"></i></a></li>`).join('')}</ul>` : ''}</li>`;
+}).join('');
+$('#navPer').innerHTML = `<b><i data-lucide="calendar-days"></i>${H.PERIOD.title}</b><p>${H.PERIOD.text}</p>${H.chip(H.PERIOD.status)}`;
+$('#note').textContent = H.NOTE;
+
+const S = H.STATS;
+$('#wVat').innerHTML = `<div class="hd"><div><h2 class="vat-title">Rejestry i VAT</h2><p class="sub" style="margin:0">${V.cap(S.month)} · ${H.ORG}</p></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${H.chip('confirm')}<a class="btn pri" href="03-podglad.html">Otwórz rejestry<i data-lucide="arrow-right"></i></a></div></div>
+  <div class="kp"><div><small>Sprzedaż</small><b>${V.docs(S.salesCount)}</b></div><div><small>VAT należny</small><b>${V.fmt(S.salesVat)}</b></div>
+  <div><small>VAT naliczony</small><b>${V.fmt(S.purchVat)}</b></div><div class="warn"><small>Bez potwierdzenia KSeF</small><b>${S.ksefMissing}</b></div></div>
+  <div class="spark"><div class="sh"><span>Sprzedaż brutto w 2026 — kliknij miesiąc, aby otworzyć rejestr</span><a href="03-podglad.html">Cały rejestr</a></div>
+    <div class="bars">${S.monthly.map((m,i) => { const mx = Math.max(...S.monthly.map(x=>x.gross));
+      return m.count ? `<a href="03-podglad.html?m=${i}" class="${i===9?'cur':''}" title="${V.cap(V.MONTHS[i])}: ${V.docs(m.count)}, ${V.fmt(m.gross)}"><i style="--h:${Math.round(m.gross/mx*100)}%"></i><small>${V.MONTHS_SHORT[i]}</small></a>`
+        : `<span class="f"><i></i><small>${V.MONTHS_SHORT[i]}</small></span>`; }).join('')}</div></div>`;
+
+const TODO = [
+  ['Potwierdź okres księgowy 2026','Odblokuje operacje księgowe'],
+  ['Potwierdź kontekst VAT','Rejestr VAT i Kontrole'],
+  ['Wybierz formę opodatkowania','KPiR'],
+  ['Wybierz stawkę ryczałtu','Ewidencja przychodów'],
+  ['Dodaj ewidencję środków trwałych','Majątek']
+];
+$('#wTodo').innerHTML = `<h2>Do zrobienia</h2><p class="sub">Kroki, które odblokują kolejne obszary</p>
+  <ul class="todo">${TODO.map(t=>`<li><button data-todo="${t[0]}"><span class="cb"></span><span><b>${t[0]}</b><small>${t[1]}</small></span></button></li>`).join('')}</ul>`;
+$('#wPer').innerHTML = `<h2>${H.PERIOD.title}</h2><p class="sub">Okres rozliczeniowy</p><p>${H.PERIOD.text}</p>${H.chip(H.PERIOD.status)}`;
+$('#wAvail').innerHTML = `<h2>Dostępność obszarów</h2><p class="sub">${H.AVAIL_TEXT}</p>
+  <table class="tbl"><thead><tr><th>Obszar</th><th>Status</th><th class="hide-m">Warunki</th></tr></thead><tbody>
+  ${H.AVAIL.map(i => { const met=i.c.filter(c=>c[0]==='y').length; return `<tr class="r" data-row="${i.id}" tabindex="0"><td><span class="nm"><span class="ai"><i data-lucide="${i.icon}"></i></span>${i.name}</span></td><td>${H.chip(i.status)}</td>
+    <td class="hide-m"><span class="prog"><span class="b"><i style="width:${met/i.c.length*100}%"></i></span>${met}/${i.c.length}</span></td></tr>
+    <tr class="ex" id="ex-${i.id}" hidden><td colspan="3"><div class="in">${H.conds(i)}<a class="btn sm ${i.id==='vat'?'pri':''}" href="${i.href}">${i.cta}</a></div></td></tr>`; }).join('')}
+  </tbody></table>`;
+
+document.addEventListener('click', e => {
+  const r = e.target.closest('[data-row]'); if (r){ const ex = $('#ex-'+r.dataset.row); ex.hidden = !ex.hidden; return; }
+  const t = e.target.closest('[data-todo]'); if (t) V.toast(`„${t.dataset.todo}” — konfiguracja jest wyłączona w wersji demo`);
+});
+document.addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ') && e.target.matches('[data-row]')){ e.preventDefault(); e.target.click(); } });
+V.bindMenus();
+V.icons();
+</script>
+</body>
+</html>

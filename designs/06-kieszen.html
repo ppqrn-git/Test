@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rejestry i VAT — Kieszeń</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<style>
+:root{
+  --deep:#0B4F45;--deep2:#0E6457;--mint:#CDEFE2;--mint2:#9BDCC6;--glow:#E8F8F1;
+  --bg:#F4F7F6;--card:#fff;--ink:#102420;--muted:#5C6F6A;--faint:#98A8A3;--line:#E4EBE8;
+  --coral:#E5484D;--coral-soft:#FFECEC;--amber:#9A5B00;--amber-soft:#FFF1D9;
+  --toast-bg:#0B4F45;--toast-r:999px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{overflow-x:clip}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 "Hanken Grotesk",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid #3AB795;outline-offset:2px}
+svg.lucide{width:20px;height:20px;flex:none}
+.shell{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:400px minmax(0,1fr);gap:28px;padding:24px 24px 120px;align-items:start}
+
+/* hero band */
+.hero{background:var(--deep);color:#fff;border-radius:28px;padding:22px 22px 20px;position:sticky;top:24px;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(155,220,198,.25),transparent 70%);pointer-events:none}
+.htop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:relative;z-index:1}
+.org{margin:0;font-size:13px;color:var(--mint2)}
+h1{margin:2px 0 0;font-size:26px;line-height:1.1;font-weight:800;letter-spacing:-.02em}
+.stbtn{border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:6px 10px 6px 8px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap}
+.stbtn .d{width:8px;height:8px;border-radius:50%;background:#FFC24B}
+.stbtn b{background:#fff;color:var(--deep);border-radius:999px;padding:1px 6px;font-size:11px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:rgba(0,0,0,.18);border-radius:16px;padding:4px;margin:18px 0 0;position:relative;z-index:1}
+.seg button{border:0;background:none;color:var(--mint);font-weight:700;padding:10px;border-radius:12px}
+.seg button[aria-selected=true]{background:#fff;color:var(--deep)}
+.per{display:flex;align-items:center;justify-content:space-between;margin:18px 0 6px;position:relative;z-index:1}
+.per button.ar{border:0;background:rgba(255,255,255,.1);color:#fff;width:40px;height:40px;border-radius:12px;display:grid;place-items:center}
+.per button.ar:disabled{opacity:.3;cursor:default}
+.per .pv{border:0;background:none;color:#fff;font-weight:700;font-size:17px;display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:12px}
+.per .pv:hover{background:rgba(255,255,255,.08)}
+.gross{position:relative;z-index:1;margin-top:8px}
+.gross small{color:var(--mint2);font-size:13px}
+.gross b{display:block;font-size:44px;line-height:1.05;font-weight:800;letter-spacing:-.03em}
+.gross span{color:var(--mint);font-size:14px}
+.nv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;position:relative;z-index:1}
+.nv div{background:rgba(255,255,255,.08);border-radius:16px;padding:10px 12px}
+.nv small{display:block;color:var(--mint2);font-size:12px}
+.nv b{font-size:18px;font-weight:700}
+.rb{margin-top:16px;position:relative;z-index:1}
+.rb .lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--mint2);margin-bottom:6px}
+.rb .bar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;background:rgba(255,255,255,.12)}
+.rb .bar i{display:block}
+.rb .lg{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:13px}
+.rb .lg span{display:flex;align-items:center;gap:6px}
+.rb .lg i{width:8px;height:8px;border-radius:2px;display:block}
+
+/* list */
+.lhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:6px 0 10px}
+.lhead h2{margin:0;font-size:20px;font-weight:800;letter-spacing:-.01em}
+.lhead .sort{border:0;background:var(--card);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
+.lhead .sort svg{width:16px;height:16px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px;scrollbar-width:none}
+.chip{flex:none;border:0;background:var(--mint);color:var(--deep);border-radius:999px;padding:6px 8px 6px 12px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px}
+.chip svg{width:14px;height:14px}
+.group{margin:16px 0 6px;font-size:13px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between}
+.cardrow{background:var(--card);border-radius:20px;margin-bottom:8px;overflow:hidden;border:1px solid transparent}
+.cardrow[data-open]{border-color:var(--mint2)}
+.cardrow>button{border:0;background:none;width:100%;text-align:left;display:grid;grid-template-columns:44px 1fr auto;gap:4px 12px;align-items:center;padding:14px 16px}
+.av{width:44px;height:44px;border-radius:14px;background:var(--glow);color:var(--deep);display:grid;place-items:center;font-weight:800;font-size:14px;grid-row:span 2}
+.av.kor{background:var(--coral-soft);color:var(--coral)}
+.cardrow .p{font-weight:700;font-size:16px}
+.cardrow .g{font-weight:800;font-size:16px;text-align:right}
+.cardrow .g.neg{color:var(--coral)}
+.cardrow .s{font-size:13px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.cardrow .ks{font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px;justify-self:end;white-space:nowrap}
+.ks.w{background:var(--amber-soft);color:var(--amber)} .ks.o{background:var(--glow);color:var(--deep2)}
+.more{padding:0 16px 16px;display:grid;gap:10px}
+.more .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.more .kv div{background:var(--bg);border-radius:14px;padding:8px 12px}
+.more small{display:block;font-size:12px;color:var(--muted)}
+.more b{font-weight:600;font-size:14px;word-break:break-all}
+.more .ln{display:grid;grid-template-columns:50px 1fr 1fr 1fr;font-size:13px;padding:2px 4px}
+.more .ln span:not(:first-child){text-align:right}
+.more .ln.h{color:var(--muted)}
+.more .ra{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.pill svg{width:16px;height:16px}
+.loadmore{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+.loadmore .pg{display:flex;gap:6px;align-items:center}
+.loadmore .pg button{border:0;background:var(--card);width:40px;height:40px;border-radius:14px;display:grid;place-items:center}
+.loadmore .pg button:disabled{opacity:.35;cursor:default}
+.loadmore .pg span{font-weight:700;color:var(--ink);min-width:50px;text-align:center}
+.loadmore select{border:0;background:var(--card);height:40px;border-radius:14px;padding:0 10px;font-weight:600}
+
+/* dock */
+.dock{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;background:var(--ink);border-radius:22px;padding:6px;display:flex;gap:4px;box-shadow:0 14px 40px rgba(16,36,32,.35)}
+.dock button{border:0;background:none;color:#D5E5E0;border-radius:16px;min-width:64px;height:54px;display:grid;place-items:center;gap:0;font-size:11px;font-weight:600;padding:6px 10px;position:relative}
+.dock button:hover{background:rgba(255,255,255,.08)}
+.dock button.on{background:var(--mint);color:var(--deep)}
+.dock button .n{position:absolute;top:4px;right:10px;background:var(--coral);color:#fff;font-size:10px;border-radius:999px;min-width:16px;height:16px;display:grid;place-items:center;padding:0 4px}
+
+/* sheets */
+.scrim{position:fixed;inset:0;background:rgba(16,36,32,.4);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;bottom:0;width:min(560px,100%);transform:translate(-50%,105%);z-index:51;background:var(--card);border-radius:28px 28px 0 0;padding:10px 20px max(20px,env(safe-area-inset-bottom));max-height:88vh;overflow:auto;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.sheet.on{transform:translate(-50%,0)}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.sheet h3{margin:0 0 14px;font-size:20px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.sheet h3 button{border:0;background:var(--bg);width:36px;height:36px;border-radius:12px;display:grid;place-items:center}
+.sheet .f{display:grid;gap:6px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--muted)}
+.sheet select,.sheet input[type=search]{height:50px;border:1.5px solid var(--line);border-radius:16px;padding:0 14px;font-size:16px;background:var(--card);color:var(--ink);font-weight:500;width:100%}
+.sheet input[type=search]:focus,.sheet select:focus{border-color:var(--deep2);outline:0}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opts label{border:1.5px solid var(--line);border-radius:14px;padding:10px 14px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
+.opts label:has(input:checked){border-color:var(--deep2);background:var(--glow);color:var(--deep)}
+.opts input{display:none}
+.list2 button,.list2 label{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:14px 6px;border-bottom:1px solid var(--line);font-size:16px;font-weight:600;text-align:left;cursor:pointer}
+.list2 button small{margin-left:auto;color:var(--faint);font-weight:500;font-size:13px}
+.list2 input{accent-color:var(--deep2);width:18px;height:18px}
+.list2 .ic{width:40px;height:40px;border-radius:12px;background:var(--glow);color:var(--deep);display:grid;place-items:center}
+.months{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.months button{border:0;background:var(--bg);border-radius:14px;padding:12px 4px;font-weight:700;display:grid;gap:2px}
+.months button small{font-size:11px;color:var(--muted);font-weight:500}
+.months button[aria-pressed=true]{background:var(--deep);color:#fff}
+.months button[aria-pressed=true] small{color:var(--mint2)}
+.sfoot{display:flex;gap:8px;margin-top:6px;position:sticky;bottom:0;background:var(--card);padding-top:10px}
+.big{flex:1;height:52px;border:0;border-radius:16px;font-weight:800;font-size:16px;background:var(--bg)}
+.big.pri{background:var(--deep);color:#fff}
+
+.state{background:var(--card);border-radius:24px;padding:44px 24px;text-align:center;display:grid;justify-items:center;gap:8px}
+.state .ic{width:64px;height:64px;border-radius:20px;background:var(--glow);color:var(--deep);display:grid;place-items:center}
+.state .ic svg{width:30px;height:30px}
+.state h3{margin:8px 0 0;font-size:20px;font-weight:800}
+.state p{margin:0;color:var(--muted);max-width:380px}
+.state .a{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.state .a .big{flex:none;padding:0 20px}
+.state.err .ic{background:var(--coral-soft);color:var(--coral)}
+.skel{height:76px;border-radius:20px;background:linear-gradient(90deg,#EAF0EE,#F6F9F8,#EAF0EE);background-size:200% 100%;animation:sk 1.2s infinite;margin-bottom:8px}
+@keyframes sk{to{background-position:-200% 0}}
+
+.vat-demobar{bottom:auto!important;top:12px;left:auto!important;right:12px}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;padding:12px 12px 120px;gap:16px}
+  .hero{position:relative;top:0;border-radius:24px}
+}
+@media (max-width:420px){
+  .gross b{font-size:34px}
+  .htop{flex-direction:column-reverse;gap:10px}
+  .seg{margin-top:14px}
+  .per{margin-top:10px}
+  .nv{margin-top:12px}
+  .nv div{padding:8px 10px}
+  .nv b{font-size:16px}
+  .hero{padding:18px 16px}
+  h1{font-size:23px}
+  .dock button{min-width:56px;padding:6px 6px}
+  .cardrow>button{grid-template-columns:40px 1fr auto;padding:12px 14px}
+  .av{width:40px;height:40px}
+  .vat-demobar{top:auto!important;bottom:86px!important;right:auto!important;left:8px!important}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <section class="hero" aria-label="Podsumowanie okresu">
+    <div class="htop">
+      <div><p class="org">Onsaldo Preview Sp. z o.o.</p><h1>Rejestry i VAT</h1></div>
+      <button class="stbtn" data-sheet="status" aria-label="Status: wymaga potwierdzenia, dane demo"><span class="d"></span>Wymaga potwierdzenia<b>DEMO</b></button>
+    </div>
+    <div class="seg" role="tablist">
+      <button role="tab" data-kind="sales" aria-selected="true">Sprzedaż</button>
+      <button role="tab" data-kind="purchases" aria-selected="false">Zakupy</button>
+    </div>
+    <div class="per">
+      <button class="ar" data-step="-1" aria-label="Poprzedni miesiąc"><i data-lucide="chevron-left"></i></button>
+      <button class="pv" data-sheet="period" id="pv"></button>
+      <button class="ar" data-step="1" aria-label="Następny miesiąc"><i data-lucide="chevron-right"></i></button>
+    </div>
+    <div id="sum"></div>
+  </section>
+
+  <main>
+    <div class="lhead"><h2 id="lt">Dokumenty</h2><button class="sort" data-sheet="sort" id="sortBtn"></button></div>
+    <div class="chips" id="chips"></div>
+    <div id="list"></div>
+  </main>
+</div>
+
+<nav class="dock" aria-label="Działania">
+  <button data-sheet="search" id="dSearch"><i data-lucide="search"></i>Szukaj</button>
+  <button data-sheet="filters" id="dFilt"><i data-lucide="sliders-horizontal"></i>Filtry<span class="n" id="fN" hidden></span></button>
+  <button data-sheet="export"><i data-lucide="share"></i>Eksport</button>
+  <button data-sheet="more"><i data-lucide="ellipsis"></i>Więcej</button>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"><div class="grab"></div><div id="shBody"></div></div>
+
+<script>
+const V = VAT, $ = s => document.querySelector(s);
+const MONTH_GEN = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+const S = { kind:'sales', year:2026, month:9, op:'all', jpk:'all', series:[], q:'', sort:{key:'date',dir:-1}, page:1, size:10, open:null, demo:'data', loading:false, sheet:null,
+  show:{ number:true, ksef:true, ident:false, date:true } };
+const SORTS = [['date',-1,'Najnowsze'],['date',1,'Najstarsze'],['gross',-1,'Najwyższa kwota'],['party',1,'Kontrahent A–Z'],['number',1,'Numer dokumentu'],['ksef',1,'Numer KSeF'],['ident',1,'Identyfikator']];
+const F = () => ({ op:S.op, jpk:S.jpk, series:S.series });
+const nF = () => (S.op!=='all')+(S.jpk!=='all')+S.series.length;
+const initials = n => n.replace('Demo ','').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+function renderHero(t){
+  $('#pv').innerHTML = `${S.month==null?'Cały rok':V.cap(V.MONTHS[S.month])} ${S.year}<i data-lucide="chevron-down"></i>`;
+  if (S.demo==='error'){ $('#sum').innerHTML = `<div class="gross"><small>Brutto</small><b>—</b><span>Nie udało się wczytać kwot</span></div>`; return; }
+  const pal = ['#9BDCC6','#FFC24B','#F7A8A8','#C7D2CF','#7FB8A9'];
+  $('#sum').innerHTML = `
+    <div class="gross"><small>Brutto</small><b>${V.fmt(t.gross)}</b><span>${V.docs(t.count)}</span></div>
+    <div class="nv"><div><small>Netto</small><b>${V.fmt(t.net)}</b></div><div><small>VAT</small><b>${V.fmt(t.vat)}</b></div></div>
+    <div class="rb"><div class="lbl"><span>Kwoty według stawek VAT</span></div>
+      <div class="bar">${t.byRate.map((r,i)=>`<i style="flex:${Math.max(Math.abs(r.net),1)};background:${pal[i]}"></i>`).join('')}</div>
+      <div class="lg">${t.byRate.length ? t.byRate.map((r,i)=>`<span><i style="background:${pal[i]}"></i>${r.rate} · ${V.fmt(r.vat)}</span>`).join('') : '<span style="color:var(--mint2)">Brak kwot w tym okresie</span>'}</div></div>`;
+}
+
+function renderList(){
+  const L = $('#list');
+  $('#sortBtn').innerHTML = `<i data-lucide="arrow-up-down"></i>${SORTS.find(s=>s[0]===S.sort.key&&s[1]===S.sort.dir)?.[2]||'Sortuj'}`;
+  $('#lt').textContent = S.kind==='sales' ? 'Rejestr VAT sprzedaży' : 'Rejestr VAT zakupów';
+  const ch=[];
+  if (S.q) ch.push(['q',`„${S.q}”`]);
+  if (S.op!=='all') ch.push(['op',V.OPS[S.kind].find(o=>o[0]===S.op)[1]]);
+  if (S.jpk!=='all') ch.push(['jpk','JPK '+V.JPK.find(o=>o[0]===S.jpk)[1]]);
+  S.series.forEach(s=>ch.push(['s:'+s,'Seria '+s]));
+  $('#chips').innerHTML = ch.map(([k,l])=>`<button class="chip" data-rm="${k}" aria-label="Usuń filtr ${V.esc(l)}">${V.esc(l)}<i data-lucide="x"></i></button>`).join('');
+  $('#fN').hidden=!nF(); $('#fN').textContent=nF();
+  $('#dSearch').classList.toggle('on', !!S.q); $('#dFilt').classList.toggle('on', !!nF());
+
+  if (S.loading){ renderHero(V.sum([])); L.innerHTML = Array.from({length:6},()=>'<div class="skel"></div>').join(''); return; }
+  if (S.demo==='error'){ renderHero(); L.innerHTML = `<div class="state err"><div class="ic"><i data-lucide="wifi-off"></i></div><h3>${V.ERROR_TITLE}</h3><p>${V.ERROR_TEXT}</p><div class="a"><button class="big pri" data-retry>Spróbuj ponownie</button></div></div>`; return; }
+  const { rows, totals } = V.query({ kind:S.kind, year:S.year, month:S.month, ...F(), q:S.q, sort:S.sort });
+  const list = S.demo==='empty' ? [] : rows;
+  renderHero(S.demo==='empty' ? V.sum([]) : totals);
+  if (!list.length){
+    const f = nF()||S.q;
+    L.innerHTML = `<div class="state"><div class="ic"><i data-lucide="${f?'search-x':'inbox'}"></i></div>
+      <h3>${f?'Nic nie znaleziono':'Brak dokumentów w tym okresie'}</h3>
+      <p>${f?'Spróbuj innej frazy albo usuń filtry.':'Przewiń miesiąc strzałkami w zielonym panelu albo wybierz inny okres.'}</p>
+      <div class="a">${f?'<button class="big" data-clear>Wyczyść filtry</button>':''}<button class="big pri" data-goto>Październik 2026</button></div></div>`;
+    return;
+  }
+  const p = V.page(list, S.page, S.size); S.page=p.page;
+  let html='', last=null;
+  p.items.forEach(d=>{
+    if (S.sort.key==='date' && d.date!==last){ last=d.date; const dd=+d.date.slice(8); html+=`<div class="group"><span>${dd} ${MONTH_GEN[+d.date.slice(5,7)-1]}</span></div>`; }
+    const open = S.open===d.id;
+    html += `<div class="cardrow" ${open?'data-open':''}><button data-id="${d.id}" aria-expanded="${open}">
+      <span class="av ${d.series==='KOR'||d.series==='KZ'?'kor':''}">${initials(d.party)}</span>
+      <span class="p">${V.esc(d.party)}</span><span class="g ${d.gross<0?'neg':''}">${V.fmt(d.gross)}</span>
+      <span class="s">${S.show.number?`<span>${d.number}</span>`:''}${S.show.ident?`<span>· ${d.ident}</span>`:''}${S.show.date&&S.sort.key!=='date'?`<span>· ${V.fmtDate(d.date,'short')}</span>`:''}</span>
+      ${S.show.ksef?`<span class="ks ${d.ksef?'o':'w'}">${d.ksef?'KSeF ✓':'Brak potwierdzenia'}</span>`:'<span></span>'}
+    </button>
+    ${open?`<div class="more"><div class="kv">
+      <div><small>Data</small><b>${d.date}</b></div><div><small>Identyfikator</small><b>${d.ident}</b></div>
+      <div><small>Rodzaj operacji</small><b>${d.opLabel}</b></div><div><small>Kod JPK V7 · seria</small><b>${d.jpk||'Bez kodu'} · ${d.series}</b></div>
+      <div style="grid-column:1/-1"><small>Numer KSeF</small><b>${d.ksef||'Brak potwierdzenia'}</b></div></div>
+      <div><div class="ln h"><span>Stawka</span><span>Netto</span><span>VAT</span><span>Brutto</span></div>${d.lines.map(l=>`<div class="ln"><span>${l.rate}</span><span>${V.fmtNum(l.net)}</span><span>${V.fmtNum(l.vat)}</span><span>${V.fmtNum(l.net+l.vat)}</span></div>`).join('')}</div>
+      <div class="ra"><button class="pill" data-act="Otwarto wydruk ${d.number}"><i data-lucide="printer"></i>Drukuj</button><button class="pill" data-act="Dodaj etykietę do ${d.number}"><i data-lucide="tag"></i>Etykieta</button></div></div>`:''}</div>`;
+  });
+  html += `<div class="loadmore"><span>${p.from}–${p.to} z ${p.total}</span><div class="pg"><button data-pg="-1" ${p.page<=1?'disabled':''} aria-label="Poprzednia strona"><i data-lucide="chevron-left"></i></button><span>${p.page} / ${p.pages}</span><button data-pg="1" ${p.page>=p.pages?'disabled':''} aria-label="Następna strona"><i data-lucide="chevron-right"></i></button></div>
+    <select id="size" aria-label="Na stronie">${[10,25,50].map(n=>`<option value="${n}" ${n===S.size?'selected':''}>${n} na stronie</option>`).join('')}</select></div>`;
+  L.innerHTML = html;
+}
+
+const SHEETS = {
+  status: () => `<h3 id="shT">Status danych<button data-x aria-label="Zamknij"><i data-lucide="x"></i></button></h3>
+    <p style="margin:0 0 8px"><b>Kontekst VAT wymaga potwierdzenia.</b> Poniżej wyłącznie dane demonstracyjne, nie ewidencja organizacji.</p>
+    <p style="margin:0 0 16px;color:var(--muted)">Sprzedaż i zakupy w wybranym okresie — podgląd danych demonstracyjnych.</p><div class="sfoot"><button class="big pri" data-x>Rozumiem</button></div>`,
+  period: () => { const ms = V.monthStats(S.kind,S.year,F()); return `<h3 id="shT">Okres<button data-x aria-label="Zamknij"><i data-lucide="x"></i></button></h3>
+    <label class="f">Rok<select id="fYear">${[2025,2026].map(y=>`<option ${y===S.year?'selected':''}>${y}</option>`).join('')}</select></label>
+    <div class="f">Miesiąc</div><div class="months">${V.MONTHS_SHORT.map((m,i)=>`<button data-m="${i}" aria-pressed="${S.month===i}">${m}<small>${ms[i].count||'—'}</small></button>`).join('')}</div>
+    <div class="sfoot"><button class="big" data-m="all">Cały rok ${S.year}</button></div>`; },
+  search: () => `<h3 id="shT">Szukaj<button data-x aria-label="Zamknij"><i data-lucide="x"></i></button></h3>
+    <label class="f">Kontrahent, numer dokumentu, KSeF lub identyfikator<input type="search" id="q" value="${V.esc(S.q)}" placeholder="np. Demo Alfa 03" autocomplete="off"></label>
+    <div class="sfoot"><button class="big" data-qclear>Wyczyść</button><button class="big pri" data-x>Pokaż wyniki</button></div>`,
+  filters: () => { const opt=(a,v)=>`<option value="all">Wszystkie</option>`+a.map(([k,l])=>`<option value="${k}" ${k===v?'selected':''}>${l}</option>`).join('');
+    const n = V.query({kind:S.kind,year:S.year,month:S.month,...F(),q:S.q}).rows.length;
+    return `<h3 id="shT">Filtry<button data-x aria-label="Zamknij"><i data-lucide="x"></i></button></h3>
+    <label class="f">Rodzaj operacji<select id="fOp">${opt(V.OPS[S.kind],S.op)}</select></label>
+    <label class="f">Kod JPK V7<select id="fJpk">${opt(V.JPK,S.jpk)}</select></label>
+    <div class="f">Serie dokumentów</div><div class="opts" style="margin-bottom:14px">${V.SERIES[S.kind].map(s=>`<label><input type="checkbox" data-series="${s}" ${S.series.includes(s)?'checked':''}>${V.SERIES_LABEL[s]}</label>`).join('')}</div>
+    <div class="sfoot"><button class="big" data-clear>Wyczyść filtry</button><button class="big pri" data-x>Pokaż ${V.docs(n)}</button></div>`; },
+  sort: () => `<h3 id="shT">Sortowanie i pola<button data-x aria-label="Zamknij"><i data-lucide="x"></i></button></h3>
+    <div class="list2">${SORTS.map((s,i)=>`<button data-sorti="${i}">${s[2]}${s[0]===S.sort.key&&s[1]===S.sort.dir?'<small>wybrane</small>':''}</button>`).join('')}</div>
+    <div class="f" style="margin-top:18px">Pola na karcie dokumentu</div>
+    <div class="list2">${[['number','Numer dokumentu'],['ksef','Numer KSeF'],['ident','Identyfikator'],['date','Data']].map(([k,l])=>`<label><input type="checkbox" data-show="${k}" ${S.show[k]?'checked':''}>${l}</label>`).join('')}</div>`,
+  export: () => `<h3 id="shT">Eksport<button data-x aria-label="Zamknij"><i data-lucide="x"></i></button></h3>
+    <div class="list2"><button data-act="Pobieranie CSV…"><span class="ic"><i data-lucide="file-text"></i></span>Plik CSV<small>do arkusza</small></button>
+    <button data-act="Pobieranie XLSX…"><span class="ic"><i data-lucide="sheet"></i></span>Arkusz XLSX<small>Excel</small></button>
+    <button data-act="Pobieranie PDF…"><span class="ic"><i data-lucide="file"></i></span>Dokument PDF<small>do wysłania</small></button></div>`,
+  more: () => `<h3 id="shT">Więcej<button data-x aria-label="Zamknij"><i data-lucide="x"></i></button></h3>
+    <div class="list2"><button data-act="Otwarto podgląd wydruku"><span class="ic"><i data-lucide="printer"></i></span>Drukuj rejestr</button>
+    <button data-act="Etykiety: wybierz dokument, aby dodać etykietę"><span class="ic"><i data-lucide="tag"></i></span>Etykiety</button>
+    <button data-sheet="sort"><span class="ic"><i data-lucide="list"></i></span>Sortowanie i pola</button></div>`
+};
+function openSheet(name){ S.sheet=name; $('#shBody').innerHTML = SHEETS[name](); $('#sheet').classList.add('on'); $('#scrim').classList.add('on'); V.icons(); if(name==='search') setTimeout(()=>$('#q')?.focus(),120); }
+function closeSheet(){ S.sheet=null; $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); }
+function refreshSheet(){ if (S.sheet && S.sheet!=='search') { $('#shBody').innerHTML = SHEETS[S.sheet](); V.icons(); } }
+
+function render(){ renderList(); V.icons(); }
+function clear(){ S.op='all'; S.jpk='all'; S.series=[]; S.q=''; S.page=1; }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.kind){ S.kind=t.dataset.kind; S.op='all'; S.series=[]; S.page=1; S.open=null; document.querySelectorAll('[data-kind]').forEach(x=>x.setAttribute('aria-selected',String(x===t))); render(); }
+  else if (t.dataset.sheet) openSheet(t.dataset.sheet);
+  else if ('x' in t.dataset) closeSheet();
+  else if (t.dataset.step){ let m=(S.month??0)+ +t.dataset.step, y=S.year; if(m<0){m=11;y--;} if(m>11){m=0;y++;} if(y>=2025&&y<=2026){S.month=m;S.year=y;S.page=1;S.open=null;} render(); }
+  else if (t.dataset.m){ S.month=t.dataset.m==='all'?null:+t.dataset.m; S.page=1; render(); closeSheet(); }
+  else if (t.dataset.sorti){ const s=SORTS[+t.dataset.sorti]; S.sort={key:s[0],dir:s[1]}; S.page=1; render(); closeSheet(); }
+  else if (t.dataset.id){ S.open=S.open===t.dataset.id?null:t.dataset.id; render(); }
+  else if (t.dataset.pg){ S.page+= +t.dataset.pg; S.open=null; render(); window.scrollTo({top:$('main').offsetTop-12,behavior:'smooth'}); }
+  else if (t.dataset.rm){ const k=t.dataset.rm; if(k==='q')S.q=''; else if(k==='op')S.op='all'; else if(k==='jpk')S.jpk='all'; else S.series=S.series.filter(x=>x!==k.slice(2)); render(); }
+  else if ('clear' in t.dataset){ clear(); render(); refreshSheet(); }
+  else if ('qclear' in t.dataset){ S.q=''; $('#q').value=''; render(); }
+  else if ('goto' in t.dataset){ clear(); S.year=2026; S.month=9; render(); }
+  else if ('retry' in t.dataset){ demo.set('data'); S.demo='data'; S.loading=true; render(); setTimeout(()=>{S.loading=false; render();},900); }
+  else if (t.dataset.act){ closeSheet(); V.toast(t.dataset.act); }
+});
+document.addEventListener('change', e => {
+  const t=e.target;
+  if (t.id==='fYear') S.year=+t.value;
+  else if (t.id==='fOp') S.op=t.value;
+  else if (t.id==='fJpk') S.jpk=t.value;
+  else if (t.dataset.series) S.series=t.checked?[...S.series,t.dataset.series]:S.series.filter(x=>x!==t.dataset.series);
+  else if (t.dataset.show) S.show[t.dataset.show]=t.checked;
+  else if (t.id==='size') S.size=+t.value;
+  else return;
+  S.page=1; render(); refreshSheet();
+});
+document.addEventListener('input', e => { if (e.target.id==='q'){ S.q=e.target.value; S.page=1; render(); } });
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeSheet(); if (e.key==='Enter' && e.target.id==='q') closeSheet(); });
+$('#scrim').addEventListener('click', closeSheet);
+
+const demo = V.demoBar(s => { S.demo=s; render(); });
+render();
+</script>
+</body>
+</html>

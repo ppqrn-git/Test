@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obszary księgowe — Onsaldo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<script src="shared/shell.js"></script>
+<style>
+:root{
+  --bg:#ECEFF3;--panel:#fff;--ink:#1E2430;--muted:#5B6474;--faint:#949CAB;--line:#E2E6EC;--hover:#F4F6F9;
+  --blue:#0050D8;--blue-soft:#E8EFFD;--ok:#0C7C59;--ok-soft:#E3F4EC;--warn:#A35400;--warn-soft:#FFF1DE;--err:#C0262D;--err-soft:#FDECEC;
+  --navy:linear-gradient(120deg,#15274D 0%,#1F3B76 100%);--navy-ink:#fff;--navy-muted:#A9BADB;--navy-line:rgba(255,255,255,.12);
+  --toast-bg:#15274D;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+html{overflow-x:clip}
+[hidden]{display:none!important}
+body{background:linear-gradient(155deg,#F4F6F9 0%,#E9EDF2 42%,#DBE1EA 100%);background-attachment:fixed;color:var(--ink);font:400 14px/1.5 "Onest",system-ui,sans-serif;font-feature-settings:"tnum" 1}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+svg.lucide{width:18px;height:18px;flex:none}
+.wrap{max-width:1160px;margin:0 auto;padding:24px 20px 80px;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+
+.head h1{margin:4px 0 4px;font-size:32px;letter-spacing:-.02em;line-height:1.15;font-weight:700}
+.head p{margin:0;color:var(--muted);max-width:60ch}
+.note{display:flex;gap:10px;align-items:center;background:var(--warn-soft);color:#7A4300;border:1px solid #F3DDB8;border-radius:12px;padding:10px 14px;font-size:13.5px}
+.note svg{color:var(--warn)}
+
+/* period — navy strip, same language as the register ribbon */
+.period{background:var(--navy);color:var(--navy-ink);border-radius:18px;padding:20px 22px;display:flex;gap:16px;align-items:center;box-shadow:0 16px 32px -20px rgba(21,39,77,.75);flex-wrap:wrap}
+.period .ic{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.12);display:grid;place-items:center;flex:none}
+.period .ic svg{width:22px;height:22px}
+.period .tx{flex:1;min-width:220px}
+.period h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-.015em}
+.period p{margin:2px 0 0;color:var(--navy-muted);max-width:62ch}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.mute{background:var(--hover);color:var(--muted)}
+.chip i{width:7px;height:7px;border-radius:50%;background:currentColor;display:block}
+
+/* areas grid */
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:6px 0 -6px}
+.sec-h h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em}
+.sec-h span{color:var(--muted);font-size:13px}
+.areas{display:grid;grid-template-columns:1.35fr repeat(3,1fr);gap:12px}
+.area{position:relative;display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;text-decoration:none;color:var(--ink);box-shadow:0 1px 2px rgba(23,27,36,.04);transition:border-color .15s,box-shadow .15s,transform .15s}
+.area:hover{border-color:#C9D3E3;box-shadow:0 14px 30px -20px rgba(21,39,77,.45);transform:translateY(-2px)}
+.area .ai{width:42px;height:42px;border-radius:12px;background:var(--hover);display:grid;place-items:center;color:var(--muted)}
+.area h3{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.area p{margin:0;color:var(--muted);font-size:13.5px}
+.area .go{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+.area .go svg{width:16px;height:16px;transition:transform .15s}
+.area:hover .go svg{transform:translateX(3px)}
+.area.main{background:var(--panel);border-color:#C8D5EE}
+.area.main .ai{background:var(--navy);color:#fff}
+.area.main h3{font-size:19px;view-transition-name:vat-title;width:fit-content}
+.area .stats{display:flex;gap:18px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:#F2F5FB}
+.area .stats small{display:block;font-size:12px;color:var(--muted)}
+.area .stats b{font-size:15px;font-weight:600}
+.area.main .go b{color:#1F3B76;font-weight:600;display:flex;align-items:center;gap:4px}
+
+/* availability */
+.avail{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 18px 8px;box-shadow:0 1px 2px rgba(23,27,36,.04)}
+.avail>p{margin:2px 0 12px;color:var(--muted);font-size:13.5px}
+.acc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px}
+.ac .nm{min-width:0}
+.ac{border-top:1px solid var(--line)}
+.ac>button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:13px 4px;text-align:left}
+.ac>button:hover{background:var(--hover)}
+.ac .ai{width:34px;height:34px;border-radius:10px;background:var(--hover);display:grid;place-items:center;color:var(--muted);flex:none}
+.ac .nm{font-weight:600;flex:1}
+.ac .chev{color:var(--faint);transition:transform .2s}
+.ac[data-open] .chev{transform:rotate(180deg)}
+.ac .body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s ease}
+.ac[data-open] .body{grid-template-rows:1fr}
+.ac .body>div{overflow:hidden}
+.ac .inner{padding:2px 4px 16px 50px;display:grid;gap:10px}
+.ac ul{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:13.5px}
+.ac li{display:flex;gap:8px;align-items:flex-start}
+.ac li svg{width:16px;height:16px;margin-top:2px}
+.ac li.y svg{color:var(--ok)} .ac li.n svg{color:var(--warn)} .ac li.x svg{color:var(--faint)}
+.ac .open{justify-self:start;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-weight:600;text-decoration:none;font-size:13.5px}
+.ac .open:hover{background:var(--hover)}
+.ac .open.pri{background:#15274D;border-color:#15274D;color:#fff}
+.ac .open.pri:hover{background:#1F3B76}
+
+@media (max-width:980px){ .areas{grid-template-columns:repeat(3,1fr)} .area.main{grid-column:1/-1} }
+@media (max-width:640px){ .areas{grid-template-columns:1fr} }
+@media (max-width:720px){ .acc{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:420px){ .ac .chip{white-space:normal;text-align:right;line-height:1.25} }
+@media (max-width:520px){
+  .wrap{padding:16px 12px 60px;gap:14px}
+  .head h1{font-size:26px}
+  .areas{grid-template-columns:1fr}
+  .period{padding:16px}
+  .ac .inner{padding-left:4px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+
+<main class="wrap page-enter">
+  <div class="head">
+    <nav class="crumbs" aria-label="Ścieżka"><span>Ewidencje</span></nav>
+    <h1>Obszary księgowe</h1>
+    <p>Mapa dostępnych obszarów księgowych dla aktywnej organizacji.</p>
+  </div>
+
+  <div class="note" role="note"><i data-lucide="info"></i>To jest mapa zakresu, a nie uruchomienie księgowania. Dane pozostają demonstracyjne.</div>
+
+  <section class="period" aria-label="Okres księgowy">
+    <span class="ic"><i data-lucide="calendar-days"></i></span>
+    <div class="tx">
+      <h2>Okres księgowy · 2026</h2>
+      <p>Orientacyjny rok rozliczeniowy aktywnej organizacji. Wymaga potwierdzenia przed uruchomieniem operacji księgowych.</p>
+    </div>
+    <span class="chip warn"><i></i>Wymaga konfiguracji</span>
+  </section>
+
+  <div class="sec-h"><h2>Obszary</h2><span>Onsaldo Preview Sp. z o.o.</span></div>
+  <section class="areas" id="areas"></section>
+
+  <section class="avail" aria-labelledby="availH">
+    <div class="sec-h" style="margin:0"><h2 id="availH">Dostępność obszarów</h2></div>
+    <p>Status pokazuje gotowość warunków, ale nie uruchamia księgowania ani operacji zewnętrznych.</p>
+    <div class="acc" id="acc"></div>
+  </section>
+</main>
+
+<script>
+const V = VAT, $ = s => document.querySelector(s);
+Shell.mount();
+
+const oct = V.sum(V.query({ kind:'sales', year:2026, month:9 }).rows);
+const octP = V.sum(V.query({ kind:'purchases', year:2026, month:9 }).rows);
+
+const AREAS = [
+  { href:'03-podglad.html', icon:'receipt-text', name:'Rejestry i VAT', main:true,
+    text:'Sprzedaż i zakupy w wybranym okresie, sumy według stawek VAT, statusy KSeF.' },
+  { href:'wkrotce.html?o=ksiegowania', icon:'landmark', name:'Księgowania', text:'KPiR, ewidencja przychodów i pełne księgi.' },
+  { href:'wkrotce.html?o=majatek', icon:'archive', name:'Majątek', text:'Środki trwałe i wyposażenie.' },
+  { href:'wkrotce.html?o=kontrole', icon:'list-checks', name:'Kontrole', text:'Weryfikacja kompletności i spójności danych.' }
+];
+$('#areas').innerHTML = AREAS.map(a => `
+  <a class="area ${a.main?'main':''}" href="${a.href}">
+    <span class="ai"><i data-lucide="${a.icon}"></i></span>
+    <h3>${a.name}</h3>
+    <p>${a.text}</p>
+    ${a.main ? `<div class="stats"><div><small>Sprzedaż · paź</small><b>${V.docs(oct.count)}</b></div><div><small>VAT należny</small><b>${V.fmt(oct.vat)}</b></div><div><small>Zakupy · paź</small><b>${V.docs(octP.count)}</b></div></div>
+      <span class="go"><span class="chip warn"><i></i>Wymaga potwierdzenia</span><b>Otwórz rejestry<i data-lucide="arrow-right"></i></b></span>`
+    : `<span class="go"><span class="chip mute">Wkrótce</span><i data-lucide="arrow-right"></i></span>`}
+  </a>`).join('');
+
+const AVAIL = [
+  { id:'vat', icon:'receipt-text', name:'Rejestr VAT', chip:['warn','Wymaga potwierdzenia'], href:'03-podglad.html', open:'Otwórz rejestr VAT', pri:true,
+    items:[['y','Organizacja jest aktywna'],['n','Kontekst VAT nie został potwierdzony'],['y','Dostępne dane demonstracyjne za 2026 rok']] },
+  { id:'kpir', icon:'landmark', name:'KPiR', chip:['warn','Wymaga konfiguracji'], href:'wkrotce.html?o=kpir', open:'Otwórz KPiR',
+    items:[['n','Nie wybrano formy opodatkowania'],['x','Brak zapisów w okresie']] },
+  { id:'przychody', icon:'banknote', name:'Ewidencja przychodów', chip:['warn','Wymaga konfiguracji'], href:'wkrotce.html?o=przychody', open:'Otwórz ewidencję',
+    items:[['n','Nie wybrano stawki ryczałtu'],['x','Brak zapisów w okresie']] },
+  { id:'ksiegi', icon:'file-text', name:'Pełne księgi', chip:['mute','Niedostępne w wersji demo'], href:'wkrotce.html?o=ksiegi', open:'Zobacz szczegóły',
+    items:[['x','Plan kont nie został przygotowany'],['x','Obszar nie jest częścią wersji demonstracyjnej']] },
+  { id:'majatek', icon:'archive', name:'Majątek', chip:['warn','Wymaga konfiguracji'], href:'wkrotce.html?o=majatek', open:'Otwórz majątek',
+    items:[['n','Brak ewidencji środków trwałych'],['y','Okres księgowy jest określony']] },
+  { id:'kontrole', icon:'list-checks', name:'Kontrole', chip:['warn','Wymaga konfiguracji'], href:'wkrotce.html?o=kontrole', open:'Otwórz kontrole',
+    items:[['n','Kontrole uruchomią się po potwierdzeniu kontekstu VAT']] }
+];
+const LI = { y:'circle-check', n:'circle-alert', x:'circle-minus' };
+$('#acc').innerHTML = AVAIL.map(a => `
+  <div class="ac" id="ac-${a.id}">
+    <button aria-expanded="false" aria-controls="acb-${a.id}" data-ac="${a.id}"><span class="ai"><i data-lucide="${a.icon}"></i></span><span class="nm">${a.name}</span><span class="chip ${a.chip[0]}"><i></i>${a.chip[1]}</span><i data-lucide="chevron-down" class="chev"></i></button>
+    <div class="body" id="acb-${a.id}"><div><div class="inner">
+      <ul>${a.items.map(([k,t])=>`<li class="${k}"><i data-lucide="${LI[k]}"></i>${t}</li>`).join('')}</ul>
+      <a class="open ${a.pri?'pri':''}" href="${a.href}">${a.open}<i data-lucide="arrow-right"></i></a>
+    </div></div></div>
+  </div>`).join('');
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-ac]'); if (!b) return;
+  const ac = b.closest('.ac'), open = !ac.hasAttribute('data-open');
+  ac.toggleAttribute('data-open', open); b.setAttribute('aria-expanded', String(open));
+});
+
+V.bindMenus();
+V.icons();
+</script>
+</body>
+</html>

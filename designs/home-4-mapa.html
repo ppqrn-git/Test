@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obszary księgowe — Mapa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/base.css">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<script src="shared/shell.js"></script>
+<script src="shared/home.js"></script>
+<style>
+.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.legend{display:flex;gap:6px;flex-wrap:wrap}
+.board{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+.canvas{padding:24px 18px;overflow:auto;background:
+  radial-gradient(circle,#D9DFE9 1px,transparent 1.2px) 0 0/18px 18px,var(--panel)}
+.tree{display:flex;align-items:center;min-width:720px;--ln:#B7C3D8}
+.n{position:relative;border:1.5px solid var(--line);background:var(--panel);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left;font:inherit;color:inherit;box-shadow:0 1px 2px rgba(23,27,36,.05);min-width:0}
+.n:hover{border-color:#AEBCD6}
+.n[aria-pressed=true]{border-color:var(--navy2);box-shadow:0 0 0 3px rgba(31,59,118,.14)}
+.n .ai{width:30px;height:30px;border-radius:9px;background:var(--hover);display:grid;place-items:center;color:var(--muted);flex:none}
+.n .ai svg{width:16px;height:16px}
+.n b{display:block;font-weight:600;font-size:13.5px;line-height:1.25}
+.n small{display:block;font-size:12px;color:var(--muted)}
+.n .dot{width:9px;height:9px;border-radius:50%;flex:none;margin-left:auto}
+.dot.confirm{background:#E3A21A} .dot.config{background:#5B7BC8} .dot.na{background:#A3AAB7}
+.n.root{max-width:130px;background:var(--navy-grad);border-color:transparent;color:#fff}
+.n.root small{color:var(--navy-muted)}
+.n.root .ai{background:rgba(255,255,255,.14);color:#fff}
+.n.per{max-width:130px;border-style:dashed;border-color:#C7D3EE;background:#F5F8FE}
+.link{width:28px;height:1.5px;background:var(--ln);flex:none}
+.branches{display:flex;flex-direction:column;gap:14px;position:relative}
+.br{display:flex;align-items:center;position:relative;padding-left:28px}
+.br::before{content:"";position:absolute;left:0;top:0;bottom:-14px;width:1.5px;background:var(--ln)}
+.br:first-child::before{top:50%}
+.br:last-child::before{bottom:50%}
+.br:only-child::before{display:none}
+.br::after{content:"";position:absolute;left:0;top:50%;width:28px;height:1.5px;background:var(--ln)}
+.n.area{min-width:150px;max-width:170px}
+.n.area.live{border-color:#B9C9EA}
+.n.area.live .ai{background:var(--navy-grad);color:#fff}
+.leaves{display:flex;flex-direction:column;gap:8px;position:relative;margin-left:28px}
+.leaves::before{content:"";position:absolute;left:-28px;top:50%;width:28px;height:1.5px;background:var(--ln)}
+.lf{position:relative;padding-left:24px}
+.lf::before{content:"";position:absolute;left:0;top:0;bottom:-8px;width:1.5px;background:var(--ln)}
+.lf:first-child::before{top:50%}
+.lf:last-child::before{bottom:50%}
+.lf:only-child::before{display:none}
+.lf::after{content:"";position:absolute;left:0;top:50%;width:24px;height:1.5px;background:var(--ln)}
+.lf .n{min-width:180px}
+
+.panel{position:sticky;top:16px;padding:20px;display:grid;gap:12px}
+.panel .k{color:var(--muted);font-size:12.5px}
+.panel h2{margin:0;font-size:20px;letter-spacing:-.01em}
+.panel p{margin:0;color:var(--muted)}
+.panel .kids{display:grid;gap:6px}
+.panel .kids a{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--hover);text-decoration:none;font-weight:500}
+.panel .kids a:hover{background:#E9EDF4}
+.panel .acts{display:flex;gap:8px;flex-wrap:wrap}
+.hint{color:var(--muted);font-size:12.5px;display:flex;gap:6px;align-items:center}
+.hint svg{width:15px;height:15px}
+
+@media (max-width:1100px){ .board{grid-template-columns:1fr} .panel{position:static} }
+@media (max-width:860px){
+  .canvas{padding:18px 14px;overflow:visible}
+  .tree{flex-direction:column;align-items:stretch;min-width:0;gap:0}
+  .tree>.link{width:1.5px;height:16px;margin-left:24px}
+  .branches{margin-left:24px;padding-top:14px;gap:12px}
+  .branches::before{content:"";position:absolute;left:0;top:0;height:14px;width:1.5px;background:var(--ln)}
+  .br{flex-direction:column;align-items:stretch;padding-left:20px}
+  .br::before{top:0;bottom:-12px}
+  .br:first-child::before{top:0}
+  .br:last-child::before{bottom:auto;height:24px}
+  .br:only-child::before{display:block}
+  .br::after{top:24px;width:20px}
+  .leaves{margin:8px 0 0 22px}
+  .leaves::before{left:-22px;top:-8px;width:1.5px;height:calc(100% + 8px);display:none}
+  .lf::before{top:-8px}
+  .lf:first-child::before{top:-8px}
+  .lf:last-child::before{bottom:auto;height:calc(50% + 8px)}
+  .lf:only-child::before{display:block}
+  .n.area,.lf .n{min-width:0;width:100%}
+  .n small{white-space:normal}
+}
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<main class="wrap page-enter">
+  <div class="top">
+    <div class="pg-h"><nav class="crumbs"><span>Ewidencje</span></nav><h1>Obszary księgowe</h1><p>Mapa dostępnych obszarów księgowych dla aktywnej organizacji. Kliknij element mapy, aby zobaczyć szczegóły.</p></div>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="note" role="note"><i data-lucide="info"></i><span id="note"></span></div>
+  <div class="board">
+    <section class="card canvas" aria-label="Mapa zakresu"><div class="tree" id="tree"></div></section>
+    <aside class="card panel" id="panel" aria-live="polite"></aside>
+  </div>
+</main>
+<script>
+const V = VAT, H = HOME, $ = s => document.querySelector(s);
+Shell.mount({ home:true });
+$('#note').textContent = H.NOTE;
+$('#legend').innerHTML = ['confirm','config','na'].map(s=>H.chip(s)).join('');
+
+let sel = 'leaf:vat';
+function renderTree(){
+  const node = (key, cls, icon, title, sub, dot, extra='') =>
+    `<button class="n ${cls}" data-sel="${key}" aria-pressed="${sel===key}"><span class="ai"><i data-lucide="${icon}"></i></span><span><b ${extra}>${title}</b>${sub?`<small>${sub}</small>`:''}</span>${dot?`<i class="dot ${dot}"></i>`:''}</button>`;
+  $('#tree').innerHTML =
+    node('org','root','building-2','Onsaldo Preview','Sp. z o.o.') + '<span class="link"></span>' +
+    node('period','per','calendar-days','Okres 2026', H.STATUS[H.PERIOD.status].label, H.PERIOD.status) + '<span class="link"></span>' +
+    `<div class="branches">${H.AREAS.map(a => `<div class="br">
+      ${node('area:'+a.id, 'area'+(a.live?' live':''), a.icon, a.name, a.live ? V.docs(H.STATS.salesCount)+' · paź' : 'Wkrótce', null, a.live?'class="vat-title"':'')}
+      <div class="leaves">${H.availOf(a.id).map(i => `<div class="lf">${node('leaf:'+i.id,'leaf',i.icon,i.name,H.STATUS[i.status].label,i.status)}</div>`).join('')}</div>
+    </div>`).join('')}</div>`;
+}
+function renderPanel(){
+  const [t, id] = sel.split(':');
+  let h = '';
+  if (t==='org') h = `<span class="k">Organizacja</span><h2>${H.ORG}</h2><p>${H.NOTE}</p><p class="hint"><i data-lucide="mouse-pointer-click"></i>Wybierz obszar na mapie, aby zobaczyć jego gotowość.</p>`;
+  else if (t==='period') h = `<span class="k">Okres rozliczeniowy</span><h2>${H.PERIOD.title}</h2>${H.chip(H.PERIOD.status)}<p>${H.PERIOD.text}</p>`;
+  else if (t==='area'){ const a = H.area(id); h = `<span class="k">Obszar</span><h2>${a.name}</h2>${a.live?H.chip('confirm'):H.chip('soon')}<p>${a.desc}</p>
+      <div class="kids">${H.availOf(id).map(i=>`<a href="${i.href}">${i.name}${H.chip(i.status)}</a>`).join('')}</div>
+      <div class="acts"><a class="btn ${a.live?'pri':''}" href="${a.href}">${a.live?'Otwórz rejestry':'Przejdź do obszaru'}<i data-lucide="arrow-right"></i></a></div>`; }
+  else { const i = H.AVAIL.find(x=>x.id===id); const a = H.area(i.area); h = `<span class="k">Dostępność · ${a.name}</span><h2>${i.name}</h2>${H.chip(i.status)}
+      <p>Następny krok: <b style="color:var(--ink)">${i.next}</b></p>${H.conds(i)}<p style="font-size:12.5px">${H.AVAIL_TEXT}</p>
+      <div class="acts"><a class="btn ${i.id==='vat'?'pri':''}" href="${i.href}">${i.cta}<i data-lucide="arrow-right"></i></a></div>`; }
+  $('#panel').innerHTML = h;
+}
+function render(){ renderTree(); renderPanel(); V.icons(); }
+document.addEventListener('click', e => {
+  const n = e.target.closest('[data-sel]'); if (!n) return;
+  if (n.dataset.sel === sel && n.dataset.sel === 'area:vat') { location.href = '03-podglad.html'; return; }
+  sel = n.dataset.sel; render();
+  if (innerWidth <= 1100) $('#panel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+});
+render();
+V.bindMenus();
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Podgląd mobilny — iPhone SE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/base.css">
+<style>
+body{background:linear-gradient(155deg,#E9EDF2,#D5DCE6)}
+.wrap{max-width:none;padding:24px}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.hd h1{margin:0;font-size:26px;letter-spacing:-.02em}
+.hd p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.ctl{display:flex;gap:6px;flex-wrap:wrap}
+.ctl button{height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-weight:600;color:var(--muted)}
+.ctl button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.phones{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.ph{display:grid;gap:10px;justify-items:center}
+.ph .lbl{font-size:13px;font-weight:600;color:var(--ink);display:flex;gap:8px;align-items:center}
+.ph .lbl span{font-weight:500;color:var(--muted)}
+.frame{width:calc(var(--w) * 1px + 20px);border-radius:44px;padding:10px;background:#111520;box-shadow:0 30px 60px -30px rgba(17,21,32,.6),inset 0 0 0 2px #2A3142}
+.frame iframe{display:block;width:calc(var(--w) * 1px);height:calc(var(--h) * 1px);border:0;border-radius:34px;background:#fff}
+.ph a{font-size:12.5px;color:var(--navy2);text-decoration:none;font-weight:600}
+.ph a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="hd">
+    <div><h1>Podgląd mobilny</h1><p>Prawdziwe strony prototypu w oknach o rozmiarze telefonu. Każdy ekran działa: można przewijać, klikać, przechodzić do rejestru i przełączać motyw.</p></div>
+    <div class="ctl" role="group" aria-label="Urządzenie">
+      <button data-dev="375x667" aria-pressed="true">iPhone SE · 375×667</button>
+      <button data-dev="390x844" aria-pressed="false">iPhone 14 · 390×844</button>
+      <button data-dev="360x780" aria-pressed="false">Android · 360×780</button>
+    </div>
+  </div>
+  <section class="phones" id="phones"></section>
+</main>
+<script>
+const SCREENS = [
+  ['home-2-panel.html', 'Główna', 'jasny', 'light'],
+  ['home-2-panel.html', 'Główna', 'ciemny', 'dark'],
+  ['03-podglad.html', 'Rejestry i VAT', 'jasny', 'light'],
+  ['03-podglad.html', 'Rejestry i VAT', 'ciemny', 'dark']
+];
+function render(dev){
+  const [w, h] = dev.split('x').map(Number);
+  document.getElementById('phones').innerHTML = SCREENS.map(([src, name, t, theme]) => `
+    <div class="ph"><div class="lbl">${name}<span>motyw ${t}</span></div>
+      <div class="frame" style="--w:${w};--h:${h}"><iframe src="${src}?theme=${theme}" title="${name}, motyw ${t}" loading="lazy"></iframe></div>
+      <a href="${src}?theme=${theme}" target="_blank" rel="noopener">Otwórz osobno</a></div>`).join('');
+}
+document.querySelector('.ctl').addEventListener('click', e => {
+  const b = e.target.closest('[data-dev]'); if (!b) return;
+  document.querySelectorAll('[data-dev]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  render(b.dataset.dev);
+});
+render('375x667');
+</script>
+</body>
+</html>

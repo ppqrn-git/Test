@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rejestry i VAT — 7 концептов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F5F7;--card:#fff;--ink:#16191F;--muted:#5D6470;--line:#E3E6EB}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 "Onest",system-ui,sans-serif}
+.page{max-width:1120px;margin:0 auto;padding:48px 24px 80px}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0 0 10px;letter-spacing:-.02em}
+.lead{color:var(--muted);max-width:62ch;margin:0 0 32px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+a.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+a.card:hover{border-color:#B8C0CC;transform:translateY(-2px)}
+a.card:focus-visible{outline:2px solid #2B5BD7;outline-offset:2px}
+.sw{display:flex;gap:4px;margin-bottom:14px}
+.sw i{width:22px;height:22px;border-radius:6px;display:block;border:1px solid rgba(0,0,0,.06)}
+.card h2{margin:0 0 2px;font-size:20px;letter-spacing:-.01em}
+.card .font{font-size:13px;color:var(--muted);margin:0 0 10px}
+.card p{margin:0 0 12px}
+.card ul{margin:0;padding-left:18px;color:var(--muted);font-size:14px}
+.card ul li{margin-bottom:3px}
+.card .open{margin-top:auto;padding-top:14px;font-weight:600;color:#2B5BD7}
+.note{margin-top:36px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 24px;color:var(--muted);font-size:14px}
+.note b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){a.card{transition:none}}
+</style>
+</head>
+<body>
+<main class="page">
+  <a class="card" href="home-1-sciezka.html" style="margin-bottom:28px;flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(120deg,#15274D,#1F3B76);border-color:transparent;color:#fff">
+    <div style="flex:1;min-width:220px"><h2>Прототип: 7 вариантов главной → Rejestry i VAT</h2><p class="font" style="margin:0;color:#A9BADB">Ścieżka, Panel, Wyszukiwarka, Mapa, Oś roku, Tablica, Bento — переключатель внизу слева. Реестр: вариант 3, полоса Granat, Onest.</p></div>
+    <span class="open" style="margin:0;padding:0;color:#fff">Открыть варианты</span>
+  </a>
+  <h1>Rejestry i VAT: 7 направлений</h1>
+  <p class="lead">Каждый концепт — рабочий прототип на одних и тех же демо-данных: вкладки, поиск, фильтры, сортировка, пагинация, раскрытие документа. Внизу слева переключатель состояний: «Dane / Pusto / Błąd». Все поля и действия исходного экрана сохранены — второстепенные убраны в меню, поповеры и панели.</p>
+
+  <a class="card" href="03-podglad-kolory.html" style="margin-bottom:24px;flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap"><div class="sw" style="margin:0"><i style="background:#ECEFF3"></i><i style="background:linear-gradient(135deg,#0B2A5B,#0E8FA3)"></i><i style="background:linear-gradient(135deg,#FF8A4C,#C2347A)"></i><i style="background:linear-gradient(135deg,#073B33,#C6F36B)"></i><i style="background:#E4DAFF"></i><i style="background:linear-gradient(135deg,#0E1117 45%,#FFB020)"></i></div><div style="flex:1;min-width:220px"><h2>Выбрано: 3. Просмотр — 6 цветовых вариантов</h2><p class="font" style="margin:0">0 Oryginał · 1 Ocean · 2 Zachód · 3 Szmaragd · 4 Pastele · 5 Noc — переключатель внизу справа или клавиши 0–5</p></div><span class="open" style="margin:0;padding:0">Открыть</span></a>
+  <div class="grid">
+    <a class="card" href="01-os-roku.html">
+      <div class="sw"><i style="background:#0E7A66"></i><i style="background:#9FD3C5"></i><i style="background:#F5F7F6"></i><i style="background:#14201D"></i></div>
+      <h2>1. Ось года</h2><p class="font">Instrument Sans</p>
+      <p>Главная навигация — шкала из 12 месяцев с высотой столбца по сумме VAT. Период выбирается одним кликом, а заодно видна динамика за год.</p>
+      <ul><li>Фильтры — боковая панель (на телефоне — шторка снизу)</li><li>Активные фильтры показаны чипами</li><li>Печать, метки, колонки — в меню «⋯»</li></ul>
+      <span class="open">Открыть прототип</span>
+    </a>
+    <a class="card" href="02-zdanie.html">
+      <div class="sw"><i style="background:#FFE38A"></i><i style="background:#1A2238"></i><i style="background:#2B3FA0"></i><i style="background:#fff"></i></div>
+      <h2>2. Фраза-фильтр</h2><p class="font">Newsreader + Hanken Grotesk</p>
+      <p>Все фильтры собраны в одну читаемую фразу: «Pokaż sprzedaż z października 2026…». Каждое подчёркнутое слово — выпадающий список. Объяснять ничего не нужно.</p>
+      <ul><li>Ответ — тоже фразой: сколько документов и на какую сумму</li><li>Документы сгруппированы по дням</li><li>На телефоне фраза просто переносится</li></ul>
+      <span class="open">Открыть прототип</span>
+    </a>
+    <a class="card" href="03-podglad.html">
+      <div class="sw"><i style="background:#0050D8"></i><i style="background:#171B24"></i><i style="background:#ECEFF3"></i><i style="background:#FFF1DE"></i></div>
+      <h2>3. Просмотр</h2><p class="font">Onest</p>
+      <p>Схема «почтовый клиент»: слева компактный список, справа полная карточка документа — ставки, статус KSeF, JPK, серия. Итоги периода — в одной ленте сверху.</p>
+      <ul><li>Навигация стрелками ↑ ↓ по списку</li><li>На телефоне карточка выезжает поверх списка</li><li>Действия над документом — прямо в карточке</li></ul>
+      <span class="open">Открыть прототип</span>
+    </a>
+    <a class="card" href="04-teczka.html">
+      <div class="sw"><i style="background:#2F5D50"></i><i style="background:#C2362F"></i><i style="background:#E6ECE7"></i><i style="background:#FDFEFC"></i></div>
+      <h2>4. Папка</h2><p class="font">Spectral + Public Sans</p>
+      <p>Тактильная метафора бухгалтерии: вкладки-корешки папки, резиновый штамп «Wymaga potwierdzenia» вместо жёлтой плашки, итоги в виде кассового чека, книга с красными полями.</p>
+      <ul><li>Фильтры — «карточка-картотека», раскрывается по кнопке</li><li>Чек фиксируется сбоку при прокрутке</li></ul>
+      <span class="open">Открыть прототип</span>
+    </a>
+    <a class="card" href="05-kalendarz.html">
+      <div class="sw"><i style="background:#5B4BDB"></i><i style="background:#D9D4FA"></i><i style="background:#1D1B3A"></i><i style="background:#F3F2F8"></i></div>
+      <h2>5. Календарь</h2><p class="font">Bricolage Grotesque</p>
+      <p>Месяц как тепловая карта: чем насыщеннее день, тем больше оборот. Клик по дню сужает список, клик по заголовку — сетка месяцев с количеством документов.</p>
+      <ul><li>Итоги и ставки VAT — под календарём</li><li>Фильтры в поповере, колонки — в меню «⋯»</li></ul>
+      <span class="open">Открыть прототип</span>
+    </a>
+    <a class="card" href="06-kieszen.html">
+      <div class="sw"><i style="background:#0B4F45"></i><i style="background:#CDEFE2"></i><i style="background:#102420"></i><i style="background:#E5484D"></i></div>
+      <h2>6. Карман</h2><p class="font">Hanken Grotesk</p>
+      <p>Mobile-first: крупная зелёная панель с суммой брутто, периодом и ставками, ниже — карточки документов. Все инструменты — в плавающей панели снизу, под большой палец.</p>
+      <ul><li>Поиск, фильтры, экспорт — шторками снизу</li><li>На десктопе панель становится липкой колонкой слева</li></ul>
+      <span class="open">Открыть прототип</span>
+    </a>
+    <a class="card" href="07-arkusz.html">
+      <div class="sw"><i style="background:#1F5FD1"></i><i style="background:#F1F1EE"></i><i style="background:#1C1F23"></i><i style="background:#FFF2DB"></i></div>
+      <h2>7. Таблица</h2><p class="font">IBM Plex Sans</p>
+      <p>Для бухгалтера, который живёт в Excel: плотная сетка с закреплённой колонкой, суммами в подвале, перетаскиванием колонок и суммой выделенных строк в статус-баре.</p>
+      <ul><li>Ctrl + K — палитра всех действий</li><li>«/» — фокус в поиск, компактный режим строк</li></ul>
+      <span class="open">Открыть прототип</span>
+    </a>
+  </div>
+
+  <div class="note"><b>Что сохранено везде:</b> название организации, заголовок и подзаголовок, статус «Wymaga potwierdzenia», метка DEMO, предупреждение о контексте VAT, обе вкладки регистров, поиск, метки, печать, экспорт, настройка колонок, фильтры Rok / Miesiąc / Rodzaj operacji / Kod JPK V7 / Serie dokumentów, сброс фильтров, суммы Netto / VAT / Brutto, суммы по ставкам VAT, колонки Kontrahent / Data / Numer dokumentu / Numer KSeF / Identyfikator, сортировка, раскрытие строки, пагинация и размер страницы.</div>
+</main>
+</body>
+</html>

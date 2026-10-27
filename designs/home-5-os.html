@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obszary księgowe — Oś roku</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/base.css">
+<script src="https://unpkg.com/lucide@0.441.0/dist/umd/lucide.min.js"></script>
+<script src="shared/core.js"></script>
+<script src="shared/shell.js"></script>
+<script src="shared/home.js"></script>
+<style>
+.tl{padding:0;overflow:hidden}
+.tl-h{display:flex;gap:16px;align-items:center;padding:20px 22px;background:var(--navy-grad);color:#fff;flex-wrap:wrap}
+.tl-h .ic{width:44px;height:44px;border-radius:13px;background:rgba(255,255,255,.12);display:grid;place-items:center;flex:none}
+.tl-h .tx{flex:1;min-width:220px}
+.tl-h h2{margin:0;font-size:20px;letter-spacing:-.01em}
+.tl-h p{margin:2px 0 0;color:var(--navy-muted);font-size:13.5px;max-width:70ch}
+.scroll{overflow-x:auto}
+.grid{display:grid;grid-template-columns:240px repeat(12,minmax(52px,1fr));min-width:900px;position:relative}
+.mh{padding:10px 4px;text-align:center;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);background:#FAFBFD}
+.mh.now{color:var(--navy2);font-weight:700}
+.corner{border-bottom:1px solid var(--line);background:#FAFBFD;padding:10px 16px;font-size:12px;color:var(--muted);position:sticky;left:0;z-index:2}
+.lab{position:sticky;left:0;z-index:2;background:var(--panel);display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);border:0;border-bottom:1px solid var(--line);text-align:left;font:inherit;color:inherit;cursor:pointer}
+.lab:hover{background:var(--hover)}
+.lab .ai{width:30px;height:30px;border-radius:9px;background:var(--hover);display:grid;place-items:center;color:var(--muted);flex:none}
+.lab .ai svg{width:16px;height:16px}
+.lab b{display:block;font-weight:600;font-size:13.5px;line-height:1.2}
+.lab small{display:block;font-size:12px;margin-top:2px}
+.lab small.confirm{color:var(--warn)} .lab small.config{color:var(--cfg)} .lab small.na{color:var(--na)}
+.cell{border-bottom:1px solid var(--line);padding:8px 3px;display:flex;align-items:center}
+.cell a{flex:1;height:38px;border-radius:9px;display:grid;place-items:center;text-decoration:none;font-size:12px;font-weight:600;color:#fff;background:var(--navy2);opacity:var(--o);transition:transform .15s,opacity .15s}
+.cell a:hover{transform:translateY(-2px);opacity:1}
+.cell.future span{flex:1;height:38px;border-radius:9px;border:1.5px dashed #CBD3E0}
+.span{grid-column:2/-1;border-bottom:1px solid var(--line);padding:8px 3px;display:flex;align-items:center}
+.span div{flex:1;height:38px;border-radius:9px;display:flex;align-items:center;gap:8px;padding:0 14px;font-size:13px;font-weight:500}
+.span.config div{background:repeating-linear-gradient(135deg,#EEF2FA 0 10px,#E4EAF7 10px 20px);color:var(--cfg)}
+.span.na div{background:repeating-linear-gradient(135deg,#F2F3F5 0 10px,#EAECEF 10px 20px);color:var(--na)}
+.span svg{width:15px;height:15px}
+.today{position:absolute;top:0;bottom:0;width:2px;background:#C0262D;z-index:1;pointer-events:none}
+.today::before{content:"dziś";position:absolute;top:2px;left:4px;font-size:10.5px;font-weight:700;color:#C0262D;background:#FFF;padding:0 3px;border-radius:3px}
+.exp{grid-column:1/-1;background:#FAFBFD;border-bottom:1px solid var(--line);padding:12px 16px 14px 56px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;position:sticky;left:0}
+.tl-f{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px;color:var(--muted);font-size:13px;flex-wrap:wrap}
+.tl-f .lg{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.tl-f .lg span{display:flex;gap:6px;align-items:center}
+.tl-f .lg i{width:14px;height:10px;border-radius:3px;display:block}
+
+.areas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.ar{display:flex;align-items:center;gap:12px;padding:14px 16px;text-decoration:none;color:inherit}
+.ar:hover{border-color:#C3CEE2}
+.ar .ai{width:38px;height:38px;border-radius:11px;background:var(--hover);display:grid;place-items:center;color:var(--muted);flex:none}
+.ar.live .ai{background:var(--navy-grad);color:#fff}
+.ar b{display:block;font-weight:600}
+.ar small{color:var(--muted);font-size:12.5px}
+.ar .go{margin-left:auto;color:var(--faint)}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0 -6px;gap:10px;flex-wrap:wrap}
+.sec h2{margin:0;font-size:17px}
+.sec span{color:var(--muted);font-size:13px}
+@media (max-width:900px){ .areas{grid-template-columns:1fr 1fr} }
+@media (max-width:520px){ .areas{grid-template-columns:1fr} .grid{grid-template-columns:170px repeat(12,48px)} .lab{padding:10px} .exp{padding-left:16px} }
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<main class="wrap page-enter">
+  <div class="pg-h"><nav class="crumbs"><span>Ewidencje</span></nav><h1>Obszary księgowe</h1><p>Mapa dostępnych obszarów księgowych dla aktywnej organizacji — na osi roku rozliczeniowego.</p></div>
+  <div class="note" role="note"><i data-lucide="info"></i><span id="note"></span></div>
+
+  <section class="card tl">
+    <div class="tl-h"><span class="ic"><i data-lucide="calendar-range"></i></span><div class="tx"><h2 id="perT"></h2><p id="perP"></p></div><span id="perC"></span></div>
+    <div class="scroll"><div class="grid" id="grid"></div></div>
+    <div class="tl-f"><span id="availP"></span>
+      <span class="lg"><span><i style="background:#1F3B76"></i>dokumenty</span><span><i style="background:repeating-linear-gradient(135deg,#EEF2FA 0 4px,#DCE4F5 4px 8px)"></i>wymaga konfiguracji</span><span><i style="border:1.5px dashed #CBD3E0"></i>przyszłe miesiące</span></span></div>
+  </section>
+
+  <div class="sec"><h2>Obszary</h2><span>Onsaldo Preview Sp. z o.o.</span></div>
+  <section class="areas" id="areas"></section>
+</main>
+<script>
+const V = VAT, H = HOME, $ = s => document.querySelector(s);
+Shell.mount({ home:true });
+$('#note').textContent = H.NOTE;
+$('#perT').textContent = H.PERIOD.title; $('#perP').textContent = H.PERIOD.text; $('#perC').innerHTML = H.chip(H.PERIOD.status);
+$('#availP').textContent = 'Dostępność obszarów: ' + H.AVAIL_TEXT.charAt(0).toLowerCase() + H.AVAIL_TEXT.slice(1);
+
+const NOW = 9 + 27/31; // 27 października
+let open = null;
+function render(){
+  const mon = H.STATS.monthly, max = Math.max(...mon.map(m=>m.gross));
+  let g = `<div class="corner">Dostępność obszarów</div>` + V.MONTHS_SHORT.map((m,i)=>`<div class="mh ${i===9?'now':''}">${m}</div>`).join('');
+  H.AVAIL.forEach(it => {
+    g += `<button class="lab" data-lane="${it.id}" aria-expanded="${open===it.id}"><span class="ai"><i data-lucide="${it.icon}"></i></span><span><b>${it.name}</b><small class="${it.status}">${H.STATUS[it.status].label}</small></span></button>`;
+    if (it.id==='vat'){
+      g += mon.map((m,i) => m.count
+        ? `<div class="cell"><a href="03-podglad.html?m=${i}" style="--o:${.45 + .55*m.gross/max}" title="${V.cap(V.MONTHS[i])}: ${V.docs(m.count)}, ${V.fmt(m.gross)} brutto — otwórz rejestr">${m.count}</a></div>`
+        : `<div class="cell future"><span></span></div>`).join('');
+    } else {
+      g += `<div class="span ${it.status}"><div><i data-lucide="${it.status==='na'?'circle-minus':'circle-alert'}"></i>${it.status==='na' ? 'Niedostępne w wersji demo' : 'Następny krok: ' + it.next}</div></div>`;
+    }
+    if (open===it.id) g += `<div class="exp">${H.conds(it)}<a class="btn sm ${it.id==='vat'?'pri':''}" href="${it.href}">${it.cta}</a></div>`;
+  });
+  $('#grid').innerHTML = g + `<span class="today" id="today"></span>`;
+  // position the "today" marker over the month columns
+  requestAnimationFrame(() => {
+    const hs = document.querySelectorAll('.mh'), first = hs[0], m = hs[9];
+    const x = m.offsetLeft + m.offsetWidth * (NOW - 9);
+    $('#today').style.left = x + 'px';
+  });
+  V.icons();
+}
+$('#areas').innerHTML = H.AREAS.map(a => `<a class="card ar ${a.live?'live':''}" href="${a.href}"><span class="ai"><i data-lucide="${a.icon}"></i></span><span><b class="${a.live?'vat-title':''}">${a.name}</b><small>${a.live ? V.docs(H.STATS.salesCount)+' w paź' : 'Wkrótce'}</small></span><i data-lucide="arrow-right" class="go"></i></a>`).join('');
+document.addEventListener('click', e => { const l = e.target.closest('[data-lane]'); if (!l) return; open = open===l.dataset.lane ? null : l.dataset.lane; render(); });
+window.addEventListener('resize', render);
+render();
+// scroll the timeline so that "today" is visible on narrow screens
+requestAnimationFrame(() => { const sc = $('.scroll'); if (sc.scrollWidth > sc.clientWidth) sc.scrollLeft = sc.scrollWidth; });
+V.bindMenus();
+</script>
+</body>
+</html>
