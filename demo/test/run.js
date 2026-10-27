@@ -7,7 +7,9 @@
   let checks = 0;
   const log = document.getElementById('log');
   const out = (t, cls) => { const d = document.createElement('div'); d.textContent = t; if (cls) d.className = cls; log.appendChild(d); };
-  const wait = ms => new Promise(r => setTimeout(r, ms));
+  // Yield without timers: hidden tabs throttle setTimeout to ~1/s, MessageChannel is not throttled.
+  // Animations are disabled during measurement, so no real delay is needed.
+  const wait = () => new Promise(r => { const c = new MessageChannel(); c.port1.onmessage = () => r(); c.port2.postMessage(0); });
   const fail = (ctx, msg) => issues.push(ctx + ' — ' + msg);
 
   function frame(w, h) {
@@ -69,6 +71,14 @@
       if (!m || m.hidden) { fail(ctx, `menu ${t.dataset.menuToggle} nie otwiera się`); continue; }
       const r = m.getBoundingClientRect();
       if (r.left < -1 || r.right > w + 1) fail(ctx, `menu ${t.dataset.menuToggle} wychodzi poza ekran (${Math.round(r.left)}…${Math.round(r.right)})`);
+      // nothing may paint on top of an open menu: probe points inside it
+      checks++;
+      const vh = doc.documentElement.clientHeight;
+      const pts = [[.5, .5], [.15, .2], [.85, .2], [.15, .8], [.85, .8]]
+        .map(([fx, fy]) => [r.left + r.width * fx, r.top + r.height * fy])
+        .filter(([x, y]) => x > 0 && x < w && y > 0 && y < vh);
+      const covered = pts.map(([x, y]) => doc.elementFromPoint(x, y)).filter(hit => hit && !m.contains(hit));
+      if (covered.length) fail(ctx, `menu ${t.dataset.menuToggle} jest zasłonięte przez <${covered[0].tagName.toLowerCase()} class="${covered[0].className}">`);
       doc.body.click();
     }
   }
@@ -108,6 +118,11 @@
           layoutChecks(ctx + ` [${s}]`, doc, w);
         }
         doc.querySelector('.vat-demobar [data-s=data]').click(); await wait(30);
+        // the demo state switcher stays clickable above page content
+        checks++;
+        const bar = doc.querySelector('.vat-demobar'), br = bar.getBoundingClientRect();
+        const hitBar = doc.elementFromPoint(br.left + br.width / 2, br.top + br.height / 2);
+        if (!hitBar || !bar.contains(hitBar)) fail(ctx, `przełącznik stanów jest zasłonięty przez <${hitBar && hitBar.tagName.toLowerCase()} class="${hitBar && hitBar.className}">`);
         // next page + page size
         doc.querySelector('[data-pg="1"]').click(); await wait(30);
         checks++;

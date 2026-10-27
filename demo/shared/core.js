@@ -240,7 +240,7 @@
 
   const css = document.createElement('style');
   css.textContent = `
-  .vat-demobar{position:fixed;left:12px;bottom:12px;z-index:9999;display:flex;align-items:center;gap:4px;padding:4px;border-radius:10px;
+  .vat-demobar{position:fixed;left:12px;bottom:12px;z-index:25;display:flex;align-items:center;gap:4px;padding:4px;border-radius:10px;
     background:rgba(20,22,28,.86);backdrop-filter:blur(8px);color:#cfd3dc;font:500 12px/1 system-ui,-apple-system,Segoe UI,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25)}
   .vat-demobar.top{top:12px;bottom:auto;left:auto;right:12px}
   .vat-demobar a{color:#cfd3dc;text-decoration:none;padding:6px 8px;border-radius:7px}

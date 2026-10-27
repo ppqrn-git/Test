@@ -72,7 +72,7 @@
   html.phone-frame,html.phone-frame *{scrollbar-width:none}
   html.phone-frame ::-webkit-scrollbar{display:none}
 
-  .topbar{view-transition-name:topbar;display:flex;align-items:center;gap:14px;max-width:1360px;margin:0 auto;padding:16px 20px;border-bottom:1px solid rgba(23,27,36,.07);min-height:73px}
+  .topbar{view-transition-name:topbar;position:relative;z-index:50;display:flex;align-items:center;gap:14px;max-width:1360px;margin:0 auto;padding:16px 20px;border-bottom:1px solid rgba(23,27,36,.07);min-height:73px}
   .topbar .hello{margin:0;margin-right:auto;font-size:22px;font-weight:700;letter-spacing:-.015em;line-height:1.2;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tb-r{display:flex;align-items:center;gap:10px;position:relative;flex:none}
   .tb-ic{position:relative;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;color:var(--ink);cursor:pointer;flex:none}
